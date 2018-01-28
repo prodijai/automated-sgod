@@ -24,7 +24,21 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
     <!-- Custom styles for this template -->
     <link href="css/dashboard.css" rel="stylesheet">
   </head>
-
+    <script src="js/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <style>
+    .tt-menu { width:300px; }
+    ul.dropdown-textbox{margin:0px;padding:10px 0px;}
+    ul.dropdown-textbox.dropdown-menu li a {padding: 10px !important;  border-bottom:#CCC 1px solid;color:#FFF;}
+    ul.dropdown-textbox.dropdown-menu li:last-child a { border-bottom:0px !important; }
+    .demo-label {font-size:1.5em;color: #686868;font-weight: 500;color:#FFF;}
+    .dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover {
+        text-decoration: none;
+        background-color: #1f3f41;
+        outline: 0;
+    }
+</style>    
   <body data-gr-c-s-loaded="true">
     <?php include("menus/top-nav.php"); ?>
 
@@ -43,7 +57,7 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="js/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="js/bootstrap.min.js"></script>

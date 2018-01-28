@@ -1,24 +1,3 @@
-<script src="js/typeahead.js"></script>
-<script>
-    $(document).ready(function () {
-        $('#search').typeahead({
-            source: function (query, result) {
-                $.ajax({
-                    url: "system/query.php",
-                    data: 'query=' + query,            
-                    dataType: "json",
-                    type: "POST",
-                    success: function (data) {
-                        result($.map(data, function (item) {
-                        return item;
-                        }));
-                    }
-                });
-            }
-        });
-    });
-</script>
-
 <?php
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 $result0 = mysqli_query($conn,"SELECT * from system_forms WHERE form_code = '".make_safe($_GET['f'])."';");
@@ -26,6 +5,26 @@ $row0 = mysqli_fetch_array($result0);
 
 $result1 = mysqli_query($conn,"SELECT * from system_entities WHERE id = '".$row0['form_entity_link']."';");
 $row1 = mysqli_fetch_array($result1);
+?>
+
+<!-- tests below -->
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+<?php
+
+$entity_code = $row1['entity_code'];
+$entity_lookup_field = $row1['entity_code'] . "_code";
+
+echo '
+<script>
+$(function() {
+    $( "#search" ).autocomplete({
+        source: "system/query.php?p=input-entity&entity_code='.$entity_code.'&lookup='.$entity_lookup_field.'"
+    });
+});
+</script>
+';
+
 ?>
           <div class="row">
             <div class="col-8">
@@ -35,10 +34,10 @@ $row1 = mysqli_fetch_array($result1);
               <form action="test_action.php" method="post">
               <h5>Entity Link</h3>
               <div class="form-group">
-                <label for="field_name">Please Input Unique ID of the <?php echo $row1['entity_name']; ?></label>
-                <input type="text" class="form-control" id="search" name="search" required>
+                <label for="search">Please Input Unique ID of the <?php echo $row1['entity_name']; ?></label>
+                <input type="text" class="form-control dropdown" id="search" name="search" required style="">
               </div>
-              <p>The data you're entering is for "Juan Dela Cruz".</p>
+              <!-- <p>The data you're entering is for "Juan Dela Cruz".</p> -->
               <hr>
               <h5><?php echo $row0['form_name'];?> Fields</h3>
               <!-- <form action="system/functions.php" method="post"> -->

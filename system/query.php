@@ -47,60 +47,49 @@ function filterurl($variable) {
 // ╩═╝╩ ╚╝ ╚═╝  ╚═╝╚═╝╩ ╩╩╚═╚═╝╩ ╩
 
 
-		$keyword = strval($_POST['query']);
-		$code = strval($_POST['entity_code']);
-		$table_name = 'usr_' . $code;
 
+
+$page_id = $_GET['p'];
+
+
+
+switch ($page_id) {
+	case 'input-entity':
+		$keyword = strval($_GET['term']);
+		$code = strval($_GET['entity_code']);
+		$table_name = 'usr_' . $code;
+		$lookup_field = strval($_GET['lookup']);
 
 
 		$search_param = "{$keyword}%";
 
 		// where name or code 
-		$sql = $conn->prepare("SELECT * FROM usr_std WHERE std_firstname LIKE ?");
+		$sql = $conn->prepare("SELECT * FROM ".$table_name." WHERE ".$lookup_field." LIKE ?");
 		$sql->bind_param("s",$search_param);			
 		$sql->execute();
 		$result = $sql->get_result();
 		if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()) {
-			$searchResult[] = $row["std_firstname"];
+			$searchResult[] = $row["$lookup_field"];
 			}
-			echo json_encode($searchResult);
+
 		}
+		else {
+			$searchResult[0] = 'Not found!';
+		}
+
+		echo json_encode($searchResult);
+
 		$conn->close();
 
-// $page_id = $_GET['p'];
-
-// switch ($page_id) {
-// 	case 'input-form':
-
-// 		// include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-// 		// $result = mysqli_query($conn,"SELECT * FROM system_entities LIMIT 4;");
-
-// 		// $i = 0; 
-// 		// while($row = mysqli_fetch_array($result)){
-// 		// 	$nav_class="";
-// 		//     $i++;
-
-// 		// 	if ($current_page == $row['entity_code']) {
-// 		// 		$nav_class="active";
-// 		// 	}
-// 		// 	elseif ($current_page == "disabled") {
-// 		// 		$nav_class="disabled";
-// 		// 	}
-
-// 		// 	echo '<li class="nav-item"><a class="nav-link '.$nav_class.'" href="?p=input-entity&e='.$row['entity_code'].'&eid='.$row['id'].'">'.$row['entity_name'].'</a></li>';
-// 		// }
-		
-// 		// mysqli_close($conn);
-
 		
 
 
-// 		break;
+		break;
 	
-// 	default:
-// 		# code...
-// 		break;
-// }
+	default:
+		# code...
+		break;
+}
 
 ?>
