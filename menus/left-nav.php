@@ -8,8 +8,9 @@
 
           <ul class="nav nav-pills flex-column">
             <?php createSidebarMenu("Data Output Management","data-output","disabled"); ?>
-            <?php createSidebarMenu("Create Report","create-report",$_GET['p']); ?>
-            <?php createSidebarMenu("List Reports","list-reports",$_GET['p']); ?>
+            <?php createSidebarMenu("View Reports","list-reports",$_GET['p']); ?>
+            <?php createSidebarMenu("Header & Footers","list-template",$_GET['p']); ?>
+
           </ul>
 
           <ul class="nav nav-pills flex-column">
@@ -21,8 +22,8 @@
           <ul class="nav nav-pills flex-column">
             <?php createSidebarMenu("Management & Administration","management","disabled"); ?>
             <?php createSidebarMenu("New Form","new-form",$_GET['p']); ?>
-            <?php createSidebarMenu("New Field","add-fields",$_GET['p']); ?>
-            <?php createSidebarMenu("New Entity","create-entity",$_GET['p']); ?>
+            <?php //createSidebarMenu("New Field","add-fields",$_GET['p']); ?>
+            <?php createSidebarMenu("New Entity","new-entity",$_GET['p']); ?>
             <?php createSidebarMenu("List Fields","list-fields",$_GET['p']); ?>
           </ul>
         </nav>

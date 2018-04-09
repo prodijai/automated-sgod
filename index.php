@@ -1,14 +1,13 @@
-<!DOCTYPE html>
 <?php 
 session_start();
+
 $_SESSION['previous_uri'] = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php"); 
 // $_GET['p']="";
-
-
+validateSession();
+validateAccess($_GET['p']);
 ?>
-
-<!-- saved from url=(0054)https://v4-alpha.getbootstrap.com/examples/dashboard/# -->
+<!DOCTYPE html>
 <html lang="en" class="gr__v4-alpha_getbootstrap_com"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,11 +18,15 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
     <title>Web App | Dashboard</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="css/dashboard.css" rel="stylesheet">
-  </head>
+
+    <!-- font awesome icons -->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <!-- Auto suggest -->
     <script src="js/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="//code.jquery.com/jquery-1.10.2.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
@@ -38,7 +41,18 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
         background-color: #1f3f41;
         outline: 0;
     }
-</style>    
+    </style>   
+
+
+    <!-- WYSISWYG -->
+    <script src="js/bootstrap-wysiwyg.js"></script> 
+
+    <script src="js/tinymce/tinymce.min.js"></script>
+    <script>tinymce.init({ selector:'textarea' });</script>
+
+
+  </head>
+
   <body data-gr-c-s-loaded="true">
     <?php include("menus/top-nav.php"); ?>
 
@@ -63,6 +77,14 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
     <script src="js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="js/ie10-viewport-bug-workaround.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+      $('#confirm-delete').on('show.bs.modal', function(e) {
+          $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+      });
+    })
+    </script>
   
 
 </body></html>

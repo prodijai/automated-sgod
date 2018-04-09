@@ -27,9 +27,9 @@
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="https://v4-alpha.getbootstrap.com/examples/jumbotron/#">Home <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="https://v4-alpha.getbootstrap.com/examples/jumbotron/#">SGOD Automation <span class="sr-only">(current)</span></a>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="https://v4-alpha.getbootstrap.com/examples/jumbotron/#">Link</a>
           </li>
           <li class="nav-item">
@@ -42,7 +42,7 @@
               <a class="dropdown-item" href="https://v4-alpha.getbootstrap.com/examples/jumbotron/#">Another action</a>
               <a class="dropdown-item" href="https://v4-alpha.getbootstrap.com/examples/jumbotron/#">Something else here</a>
             </div>
-          </li>
+          </li> -->
         </ul>
         <form class="form-inline my-2 my-lg-0" action="../system/functions.php" method="post">
           <input class="form-control mr-sm-2" type="text" placeholder="Username" name="username">
@@ -51,9 +51,17 @@
         </form>
       </div>
     </nav>
-
     <!-- Main jumbotron for a primary marketing message or call to action -->
+    <?php
+
+    if (isset($_GET['msg'])) {
+      echo '    <div class="alert alert-danger text-right" style="margin-top: 20px; margin-bottom: -5px;">
+      '.$_GET['msg'].'
+    </div>';
+    }
+    ?>
     <div class="jumbotron">
+
       <div class="container">
         <h1 class="display-3">Hello, world!</h1>
         <p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p>

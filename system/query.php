@@ -57,14 +57,15 @@ switch ($page_id) {
 	case 'input-entity':
 		$keyword = strval($_GET['term']);
 		$code = strval($_GET['entity_code']);
-		$table_name = 'usr_' . $code;
+		// $table_name = 'usr_' . $code;
+		$table_name = 'system_users';
 		$lookup_field = strval($_GET['lookup']);
 
 
 		$search_param = "{$keyword}%";
 
 		// where name or code 
-		$sql = $conn->prepare("SELECT * FROM ".$table_name." WHERE ".$lookup_field." LIKE ?");
+		$sql = $conn->prepare("SELECT * FROM ".$table_name." WHERE entity_id = ".$code." AND ".$lookup_field." LIKE ?");
 		$sql->bind_param("s",$search_param);			
 		$sql->execute();
 		$result = $sql->get_result();

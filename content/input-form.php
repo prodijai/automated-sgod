@@ -1,10 +1,15 @@
 <?php
+
+$session_entity_id = $_SESSION['entity_id'];
+
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 $result0 = mysqli_query($conn,"SELECT * from system_forms WHERE form_code = '".make_safe($_GET['f'])."';");
 $row0 = mysqli_fetch_array($result0);
 
 $result1 = mysqli_query($conn,"SELECT * from system_entities WHERE id = '".$row0['form_entity_link']."';");
 $row1 = mysqli_fetch_array($result1);
+
+
 ?>
 
 <!-- tests below -->
@@ -13,13 +18,14 @@ $row1 = mysqli_fetch_array($result1);
 <?php
 
 $entity_code = $row1['entity_code'];
-$entity_lookup_field = $row1['entity_code'] . "_code";
+$entity_id = $row1['id'];
+$entity_lookup_field = "unique_code";
 
 echo '
 <script>
 $(function() {
-    $( "#search" ).autocomplete({
-        source: "system/query.php?p=input-entity&entity_code='.$entity_code.'&lookup='.$entity_lookup_field.'"
+    $( "#unique_code" ).autocomplete({
+        source: "system/query.php?p=input-entity&entity_code='.$entity_id.'&lookup='.$entity_lookup_field.'"
     });
 });
 </script>
@@ -31,18 +37,20 @@ $(function() {
               <h2><?php echo $row0['form_name'];?></h2>
               <p><?php echo $row0['form_description'];?></p>
               <hr>
-              <form action="test_action.php" method="post">
+              <form action="system/functions.php" method="post">
               <h5>Entity Link</h3>
               <div class="form-group">
                 <label for="search">Please Input Unique ID of the <?php echo $row1['entity_name']; ?></label>
-                <input type="text" class="form-control dropdown" id="search" name="search" required style="">
+                <!-- <input type="text" class="form-control dropdown" id="<?php //echo $entity_code."_code"; ?>" name="<?php //echo $entity_code."_code"; ?>" required> -->
+                <input type="text" class="form-control dropdown" id="unique_code" name="unique_code" required>
+
               </div>
               <!-- <p>The data you're entering is for "Juan Dela Cruz".</p> -->
               <hr>
               <h5><?php echo $row0['form_name'];?> Fields</h3>
-              <!-- <form action="system/functions.php" method="post"> -->
                 <input type="text" class="form-control" id="form_code" name="form_code" hidden value="<?php echo $row0['form_code'];?>">
                 <input type="text" class="form-control" id="form_id" name="form_id" hidden value="<?php echo $row0['id'];?>">
+                <input type="text" class="form-control" id="entity_code" name="entity_code" hidden value="<?php echo $entity_code;?>">
                 
                 <?php
                 $result = mysqli_query($conn,"SELECT * from system_fields INNER JOIN system_forms ON system_forms.id = system_fields.form_link WHERE system_forms.form_code = '".make_safe($_GET['f'])."'  ORDER BY system_fields.field_order;");
@@ -52,11 +60,10 @@ $(function() {
                   $i++;
                   renderField($row['type'],$row['placeholder'],$row['required'],$row['field_value'],$row['name'],$row['code']);
                 }
-                mysqli_close($conn);
-
+ 
                 ?>
 
-                <button type="submit" class="btn btn-primary mb-2" name="input-form-data">Save</button>
+                <button type="submit" class="btn btn-primary mb-2" name="save-form-data">Save</button>
               </form>
             </div>
             
@@ -70,24 +77,37 @@ $(function() {
                 actionResult($_SESSION['action_result_page'],$_GET['p'],$_SESSION['action_notif_type'],$_SESSION['action_result_message']);
 
               ?>
+            <?php
+              if ($session_entity_id == '0') {
+                $count = '1';
+
+              } else {
+                $permission_check = mysqli_query($conn,"SELECT * FROM system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions.code = 'add-new-field-form' AND system_permissions_config.entity_id = '$session_entity_id'");
+                $count = mysqli_num_rows($permission_check);
+              }
+              // echo $count;
+
+              if ($count > '0') {
+                echo '
             <h4><a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">Add New Field</a></h4>
             <p>Add new fields to this form.</p>
             <p>
-            </p>
+            </p>    
+
             <div class="collapse" id="collapseExample">
               <div class="card card-body">
                 <form action="system/functions.php" method="post">
+                <input type="text" class="form-control" id="form_code" name="form_code" hidden value="'.$_GET['f'].'">';
 
-                <?php 
-                  echo '<input type="text" class="form-control" id="form_code" name="form_code" hidden value="'.$_GET['f'].'">';
+              if (isset($_GET['fid'])) {
+                echo '<input type="text" class="form-control" id="field_form_link" name="field_form_link" hidden value="'.$_GET['fid'].'">';
+              }
+              elseif (isset($_GET['eid'])) {
+                echo '<input type="text" class="form-control" id="field_entity_link" name="field_entity_link" hidden value="'.$_GET['eid'].'">';
+              }
 
-                if (isset($_GET['fid'])) {
-                  echo '<input type="text" class="form-control" id="field_form_link" name="field_form_link" hidden value="'.$_GET['fid'].'">';
-                }
-                elseif (isset($_GET['eid'])) {
-                  echo '<input type="text" class="form-control" id="field_entity_link" name="field_entity_link" hidden value="'.$_GET['eid'].'">';
-                }
-                ?>
+
+                echo '
                 <div class="form-group">
                   <label for="field_name">Field Name</label>
                   <input type="text" class="form-control" id="field_name" name="field_name" placeholder="friendly name of the field">
@@ -119,7 +139,7 @@ $(function() {
                   <select class="form-control" id="field_valid_char" name="field_valid_char">
                     <option value="any" selected="selected">Anything</option>
                     <option value="alphanumeric-only">Alphanumeric Only</option>
-                    <option value="aphabet-only">Alphabet Only</option>
+                    <option value="alphabet-only">Alphabet Only</option>
                     <option value="numbers-only">Numbers Only</option>
                   </select>
                 </div>
@@ -136,5 +156,33 @@ $(function() {
                 </form>
               </div>
             </div>
+
+
+                  ';
+              }
+               mysqli_close($conn);
+
+            ?>
+
+
             </div>
+          </div>
+
+
+          <!-- confirmation modal -->
+          <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                  <div class="modal-content">
+                      <div class="modal-header">
+                          Confirm Field Deleteion from Form
+                      </div>
+                      <div class="modal-body">
+                          This process cannot be undone. This will delete all data related to this field.
+                      </div>
+                      <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                          <a class="btn btn-danger btn-ok">Delete</a>
+                      </div>
+                  </div>
+              </div>
           </div>

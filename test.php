@@ -43,6 +43,11 @@
                 <label for="entity_desc">BP</label>
                 <input type="text" class="form-control" id="std_sh_bp" name="std_sh_bp" placeholder="">
               </div>
+              <div class="form-group">
+                <input type="checkbox" name="vehicle" value="Bike"> I have a bike<br>
+                <input type="checkbox" name="vehicle" value="Car" checked> I have a car<br>
+                <input type="submit" value="Submit">
+              </div>
               <button type="submit" class="btn btn-primary mb-2" name="create_entity">Create Entity</button>
               </form>
             </div>

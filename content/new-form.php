@@ -4,19 +4,19 @@
               <form action="system/functions.php" method="post">
               <div class="form-group">
                 <label for="form_name">Form Name</label>
-                <input type="text" class="form-control" id="form_name" name="form_name" placeholder="Friendly Form Name">
+                <input type="text" class="form-control" id="form_name" name="form_name" placeholder="Friendly Form Name" required>
               </div>
               <div class="form-group">
                 <label for="form_code">Form Code</label>
-                <input type="text" class="form-control" id="form_code" name="form_code" placeholder="Code Identifier for the Form">
+                <input type="text" class="form-control" id="form_code" name="form_code" placeholder="Code Identifier for the Form" required>
               </div>
               <div class="form-group">
                 <label for="form_desc">Form Description</label>
-                <input type="text" class="form-control" id="form_desc" name="form_desc" placeholder="Add a short description of the Form">
+                <input type="text" class="form-control" id="form_desc" name="form_desc" placeholder="Add a short description of the Form" required>
               </div>
               <div class="form-group">
                 <label for="form_link">Link to Entity</label>
-                <select class="form-control" id="form_link" name="form_link">
+                <select class="form-control" id="form_link" name="form_link" required>
                 <?php 
                     include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
                     $result = mysqli_query($conn,"SELECT * FROM system_entities");
@@ -46,6 +46,6 @@
 
               ?>
             <h4>Tip</h4>
-            <p>Fields should be created first before you can add them to a form.</p>
+            <p>After a form has been created, you can add new fields to the form using the right side bar.</p>
             </div>
           </div>

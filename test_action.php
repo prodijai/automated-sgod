@@ -16,30 +16,37 @@
 // 	'form_entity_link' => 'test3'
 // );
 
-// print_r($form_data);
+// // print_r($form_data);
 
 
-include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+// include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
-$table_name = 'usr_' . $_POST['form_code'];
+// $table_name = 'usr_' . $_POST['form_code'];
 
-$data = array();
+// $data = array();
 
-$result = mysqli_query($conn, "SHOW COLUMNS FROM usr_std_health");
-if (!$result) {
-    echo 'Could not run query: ' . mysqli_error();
-    exit;
-}
-if (mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-    	if(!(preg_match( '/^id.*/', $row['Field']))){
-    		$field_name = $row['Field'];
-    		echo $field_name. ' is '. $_POST[''.$field_name.''] .'<br>';
-    		$data += array($field_name => $_POST[''.$field_name.'']);
-    	}
-    }
-}
+// $result = mysqli_query($conn, "SHOW COLUMNS FROM usr_std_health");
+// if (!$result) {
+//     echo 'Could not run query: ' . mysqli_error();
+//     exit;
+// }
+// if (mysqli_num_rows($result) > 0) {
+//     while ($row = mysqli_fetch_assoc($result)) {
+//     	if(!(preg_match( '/^id.*/', $row['Field']))){
+//     		$field_name = $row['Field'];
+//     		echo $field_name. ' is '. $_POST[''.$field_name.''] .'<br>';
+//     		$data += array($field_name => $_POST[''.$field_name.'']);
+//     	}
+//     }
+// }
 
-print_r($data); // insert this data to the data base
+// print_r($data); // insert this data to the data base
+
+
+// SElECT * FROM system_fields WHERE (entity_link = '5' AND field_order< '4') OR form_link = '3' ORDER BY LOCATE('5', entity_link) DESC, field_order;
+// SElECT * FROM system_fields WHERE (entity_link = '5' AND field_order< '4') OR form_link = '3' ORDER BY entity_link DESC, form_link, field_order;
+
+
+echo $_POST['vehicle'];
 
 ?>
