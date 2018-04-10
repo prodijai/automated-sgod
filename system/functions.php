@@ -402,7 +402,7 @@ elseif (isset($_POST['edit-template'])) {
 
 	$form_data = array(
 		'name' => make_safe($_POST['field_name']),
-		'content' => make_safe($_POST['field_content']),
+		'content' => $_POST['field_content'],
 		'type' => make_safe($_POST['field_type'])
 	);
 
