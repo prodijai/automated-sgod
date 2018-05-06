@@ -3,6 +3,9 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
 
 $report_id = make_safe($_GET['rid']);
 
+// test user permission
+validateUserAccess("edit-report",'3',$report_id);
+
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 $result = mysqli_query($conn,"SELECT * FROM system_reports WHERE id = $report_id LIMIT 1");
 $report_data = mysqli_fetch_array($result);

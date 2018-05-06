@@ -1,75 +1,16 @@
 <?php
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+include("functions.php");
 
 session_start();
-
-// ╔═╗╔═╗╔═╗╦ ╦╦═╗╦╔╦╗╦ ╦
-// ╚═╗║╣ ║  ║ ║╠╦╝║ ║ ╚╦╝
-// ╚═╝╚═╝╚═╝╚═╝╩╚═╩ ╩  ╩ 
-
-function make_safe($variable) {
-    $variable = strip_html_tags($variable);
-	$bad = array("=","<", ">", "/","\"","`","~","'","$","%","#");
-	$variable = str_replace($bad, "", $variable);
-    $variable = mysql_real_escape_string(trim($variable));
-    return $variable;
-}
-
-function strip_html_tags($text) {
-    $text = preg_replace(
-        array(
-          // Remove invisible content
-            '@<head[^>]*?>.*?</head>@siu',
-            '@<style[^>]*?>.*?</style>@siu',
-            '@<script[^>]*?.*?</script>@siu',
-            '@<object[^>]*?.*?</object>@siu',
-            '@<embed[^>]*?.*?</embed>@siu',
-            '@<applet[^>]*?.*?</applet>@siu',
-            '@<noframes[^>]*?.*?</noframes>@siu',
-            '@<noscript[^>]*?.*?</noscript>@siu',
-			'@fu[^u]*?.*?ck@siu',
-            '@<noembed[^>]*?.*?</noembed>@siu'
-        ),
-        array(
-            '', '', '', '', '', '', '', '', '', ''), $text );
-      
-    return strip_tags( $text);
-}
-function filterurl($variable) {
-    $variable = strip_html_tags($variable);
-	$bad = array("=","<", ">","","`","~","'","$","%","#");
-	$variable = str_replace($bad, "", $variable);
-    $variable = mysql_real_escape_string(trim($variable));
-    return $variable;
-}
 
 $report_code = make_safe($_GET['r_id']);
 $form_link = make_safe($_GET['f_link']);
 
-#query for getting report entries
-// $result0 = mysqli_query($conn,"SELECT * from system_reports_config INNER JOIN system_fields ON system_fields.id = system_reports_config.field_id WHERE report_id = $report_code ORDER BY system_reports_config.field_order;");
-
-// #query for getting form details
-
-// $form_detail = mysqli_fetch_array($result1);
-// $header_id = $form_detail['report_header'];
-// $footer_id = $form_detail['report_footer'];
-// $form_table = "usr_".$form_detail['form_code'];
-// // $entity_table = "usr_".$form_detail['entity_code'];
-// $entity_identifier = $form_detail['entity_code'].'_code';
-// $entity_table = "system_users";
-// $unique_code = 'unique_code';
-// $entity_id = $form_detail['form_entity_link'];
-
-// // missing where clause
-// $result2 = mysqli_query($conn,"SELECT * from $form_table INNER JOIN $entity_table ON $entity_table.$unique_code = $form_table.$entity_identifier WHERE $entity_table.entity_id = $entity_id;");
+// page access check
+validateUserAccess("view-report",'3',$report_code,'system_reports');
 
 
-// $result3 = mysqli_query($conn,"SELECT * from system_reports_hnf WHERE id = $header_id;");
-// $header_data = mysqli_fetch_array($result3);
-
-// $result4 = mysqli_query($conn,"SELECT * from system_reports_hnf WHERE id = $footer_id;");
-// $footer_data = mysqli_fetch_array($result4);
 
 $form_report = mysqli_query($conn,"SELECT * FROM system_forms INNER JOIN system_reports ON system_reports.form_link = system_forms.id WHERE system_reports.id = $report_code;");
 $form_report_data = mysqli_fetch_array($form_report);
@@ -87,7 +28,37 @@ $footer_data = mysqli_fetch_array($footer);
 
 
 $form_table_name = "usr_".$form_code;
-$data_input = mysqli_query($conn,"SELECT * FROM $form_table_name INNER JOIN system_users on system_users.unique_code = $form_table_name.unique_code;");
+
+// PERMISSION CHECK
+
+$list_all = validateUserPermission('list-all-form-data','1',$form_link);
+$list_school = validateUserPermission('list-school-form-data','1',$form_link);
+$list_data = validateUserPermission('list-form-data','1',$form_link);
+
+$session_school_id = $_SESSION['school_id'];
+$session_member_id = $_SESSION['member_id'];
+
+if ($list_all == "200") {
+  // echo "list all";
+  $list_permission = "system_users.school_id LIKE '%'";
+}
+elseif ($list_school == "200") {
+  // echo "list school";
+  $list_permission = "system_users.school_id LIKE '$session_school_id'";
+}
+elseif ($list_data == "200") {
+  // echo "list data";
+  $list_permission = "$form_table_name.created_by LIKE '$session_member_id'";
+}
+else{
+  validateUserAccess('list-all-form-data','1',$form_id);
+}
+
+// echo $list_permission;
+
+//END OF PERMISSION CHECK
+
+$data_input = mysqli_query($conn,"SELECT * FROM $form_table_name INNER JOIN system_users on system_users.unique_code = $form_table_name.unique_code WHERE $list_permission;");
 $column_details = mysqli_query($conn,"SELECT * FROM system_fields INNER JOIN system_reports_config ON system_reports_config.field_id = system_fields.id WHERE system_reports_config.report_id = $report_code ORDER BY system_reports_config.field_order ASC;");
 
 ?>

@@ -1,7 +1,12 @@
 <?php
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 $result0 = mysqli_query($conn,"SELECT * from system_entities WHERE entity_code = '".make_safe($_GET['e'])."';");
-$row0 = mysqli_fetch_array($result0)
+$row0 = mysqli_fetch_array($result0);
+
+$entity_id = make_safe($_GET['eid']);
+
+validateUserAccess("input-entity",'2',$entity_id);
+
 ?>
 <script type="text/javascript">
   function generateLoginCreds(f) {
@@ -53,6 +58,29 @@ $row0 = mysqli_fetch_array($result0)
                   <label for="mobile">Mobile Number</label>
                   <input type="text" class="form-control" id="mobile" name="mobile" required placeholder="Mobile Number">
                 </div>
+
+                <!-- School -->
+                <div class="form-group">
+                <label for="enable_login">School</label>
+                <select class="form-control" id="school_id" name="school_id">
+                  <option value="" disabled="" selected="">Which school they belong?</option>
+                  <option value="1">n/a</option>
+                  <?php 
+                    include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+                    $result = mysqli_query($conn,"SELECT * FROM system_schools");
+
+                    $i = 0; 
+                    while($row = mysqli_fetch_array($result)){
+                      $i++;
+                      echo '<option value="'.$row['id'].'">'.$row['school_acronym'].' - '.$row['school_code'].'</option>';
+                    }
+                    mysqli_close($conn);
+
+                  ?>
+                </select>
+              </div>
+
+
                 <h4>Login Credentials</h4>
                 <p>The username cannot be changed.</p>
                 <hr>
@@ -73,6 +101,11 @@ $row0 = mysqli_fetch_array($result0)
             </div>
             
             <div class="col-4">
+            <h4>Actions</h4>
+            <?php
+              echo '<p>'.printViewLink('list-entity-data','2',$_GET['eid'],'e='.$_GET['e'].'&eid='.$_GET['eid'].'').printEditLink('edit-entity','2',$_GET['eid'],'e='.$_GET['e'].'&eid='.$_GET['eid'].'').'</p>';
+            ?>
+
             <h4>Updates</h4>
             <p>Updates and notifications.</p>
               <?php actionResult($_SESSION['action_result_page'],$_GET['p'],$_SESSION['action_notif_type'],$_SESSION['action_result_message']);?>

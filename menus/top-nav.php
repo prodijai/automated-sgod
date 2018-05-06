@@ -16,10 +16,11 @@
           </li> -->
 
           <?php
-          $session_entity_id = $_SESSION['entity_id'];
-          if ($session_entity_id == "0") {
+          $showGlobalPermissionLink = validateGlobalPermission('list-permissions');
+
+          if ($showGlobalPermissionLink == "200") {
             echo ' <li class="nav-item">
-            <a class="nav-link" href="?p=list-permissions">Permissions</a>
+            <a class="nav-link" href="?p=list-permissions">Global Permissions</a>
           </li>';
           }
 

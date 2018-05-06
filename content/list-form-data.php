@@ -3,20 +3,47 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
 $keyword = make_safe($_GET['k']);
 $page_id = make_safe($_GET['p']);
 
-include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-
 $form_code = $_GET['f'];
 $form_table_name = "usr_".$form_code;
-$form_id = $_GET['fid'];
+$form_id = make_safe($_GET['fid']);
 
-$result = mysqli_query($conn,"SELECT * FROM $form_table_name INNER JOIN system_users on system_users.unique_code = $form_table_name.unique_code WHERE $form_table_name.unique_code LIKE '%$keyword%'");
+// PERMISSION CHECK
+
+$list_all = validateUserPermission('list-all-form-data','1',$form_id);
+$list_school = validateUserPermission('list-school-form-data','1',$form_id);
+$list_data = validateUserPermission('list-form-data','1',$form_id);
+
+$session_school_id = $_SESSION['school_id'];
+$session_member_id = $_SESSION['member_id'];
+
+if ($list_all == "200") {
+  // echo "list all";
+  $list_permission = "system_users.school_id LIKE '%'";
+}
+elseif ($list_school == "200") {
+  // echo "list school";
+  $list_permission = "system_users.school_id LIKE '$session_school_id'";
+}
+elseif ($list_data == "200") {
+  // echo "list data";
+  $list_permission = "$form_table_name.created_by LIKE '$session_member_id'";
+}
+else{
+  validateUserAccess('list-all-form-data','1',$form_id);
+}
+
+//END OF PERMISSION CHECK
+
+include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+$result = mysqli_query($conn,"SELECT * FROM $form_table_name INNER JOIN system_users on system_users.unique_code = $form_table_name.unique_code WHERE $list_permission AND $form_table_name.unique_code LIKE '%$keyword%'");
 
 $column_fields = mysqli_query($conn,"SELECT * FROM system_fields WHERE form_link = $form_id;");
 
 ?>
           <div class="row">
             <div class="col-12">
-              <a href="?p=new-form" class="btn btn-outline-success float-right" role="button">Create New Form</a>
+              <!-- <a href="?p=new-form" class="btn btn-outline-success float-right" role="button">Create New Form</a> -->
               <h2>Available Form Data</h2>
               <p>List of all data encoded in the form.</p>
               <div class="row">
@@ -81,8 +108,8 @@ $column_fields = mysqli_query($conn,"SELECT * FROM system_fields WHERE form_link
 
 
                 echo '<td>';
-                echo printEditLink('edit-form-data','f='.$form_code.'&fid='.$form_id.'&fiid='.$row['unique_code'].'');
-                echo printDeleteLink('delete-form-data','unique_code='.$row['unique_code'] .'');
+                echo printEditLink('edit-form-data','1',$form_id,'f='.$form_code.'&fid='.$form_id.'&fiid='.$row['unique_code'].'');
+                echo printDeleteLink('delete-form-data','1',$form_id,'unique_code='.$row['unique_code'].'&form_code='.$form_code.'&fid='.$form_id.'');
                 echo ' </td>';
                 echo "</tr>";
               }

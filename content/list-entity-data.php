@@ -3,10 +3,43 @@ include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
 $keyword = make_safe($_GET['k']);
 $page_id = make_safe($_GET['p']);
 
+$entity_id = make_safe($_GET['eid']);
+$entity_code = make_safe($_GET['e']);
+
+// PERMISSION CHECK
+
+$list_all = validateUserPermission('list-all-entity-data','2',$entity_id);
+$list_school = validateUserPermission('list-school-entity-data','2',$entity_id);
+// $list_data = validateUserPermission('list-entity-data','2',$entity_id);
+
+$session_school_id = $_SESSION['school_id'];
+$session_member_id = $_SESSION['member_id'];
+
+if ($list_all == "200") {
+  // echo "list all";
+  $list_permission = "system_users.school_id LIKE '%'";
+}
+elseif ($list_school == "200") {
+  // echo "list school";
+  $list_permission = "system_users.school_id LIKE '$session_school_id'";
+}
+// elseif ($list_data == "200") {
+//   // echo "list data";
+//   $list_permission = "system_users.created_by LIKE '$session_member_id'";
+// }
+else{
+  // validateUserAccess('list-all-entity-data','2',$form_id);
+  $list_permission = "system_users.created_by LIKE '$session_member_id'";
+  
+}
+
+// echo $list_permission;
+
+// end of permission check
+
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-$entity_id = $_GET['eid'];
-$entity_code = $_GET['e'];
-$result = mysqli_query($conn,"SELECT * FROM system_users WHERE (entity_id = $entity_id AND (first_name LIKE '%$keyword%' OR last_name LIKE '%$keyword%' OR unique_code LIKE '%$keyword%')) ORDER BY id");
+
+$result = mysqli_query($conn,"SELECT * FROM system_users INNER JOIN system_schools ON system_schools.id = system_users.school_id WHERE $list_permission AND (system_users.entity_id = $entity_id AND (system_users.first_name LIKE '%$keyword%' OR system_users.last_name LIKE '%$keyword%' OR system_users.unique_code LIKE '%$keyword%')) ORDER BY system_users.id");
 ?>
           <div class="row">
             <div class="col-12">
@@ -35,7 +68,7 @@ $result = mysqli_query($conn,"SELECT * FROM system_users WHERE (entity_id = $ent
                   <th>Unique ID</th>
                   <th>Name</th>
                   <th>Email Address</th>
-                  <th>Mobile</th>
+                  <th>School</th>
                   <th>Username</th>
                   <th>Action</th>
                 </tr>
@@ -50,9 +83,9 @@ $result = mysqli_query($conn,"SELECT * FROM system_users WHERE (entity_id = $ent
                 echo "<td>" . $row['unique_code'] . "</td>";
                 echo "<td>" . $row['first_name'] . " " . $row['middle_name'] . " " . $row['last_name'] . "</td>";
                 echo "<td>" . $row['email'] . "</td>";
-                echo "<td>" . $row['mobile'] . "</td>";
+                echo "<td>" . $row['school_acronym'] . "</td>";
                 echo "<td>" . $row['username'] . "</td>";
-                echo '<td> '.printEditLink('edit-entity-data','uid='.$row['unique_code'].'') . printDeleteLink('delete-entity-data','uid='.$row['unique_code'].'&e_id='.$row['entity_id'].'') . '</td>';
+                echo '<td> '.printEditLink('edit-entity-data','2',$entity_id,'uid='.$row['unique_code'].'&eid='.$entity_id.'') . printDeleteLink('delete-entity-data','2',$entity_id,'uid='.$row['unique_code'].'&e_id='.$row['entity_id'].'') . '</td>';
                 echo "</tr>";
               }
               mysqli_close($conn);

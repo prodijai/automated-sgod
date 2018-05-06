@@ -4,6 +4,10 @@ include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 $result0 = mysqli_query($conn,"SELECT * from system_reports WHERE report_code = '".make_safe($_GET['r_code'])."';");
 $row0 = mysqli_fetch_array($result0);
 
+$report_id = $row0['id'];
+// test user permission
+validateUserAccess("configure-report",'3',$report_id);
+
 $result1 = mysqli_query($conn,"SELECT * from system_forms WHERE id = '".$row0['form_link']."';");
 $row1 = mysqli_fetch_array($result1);
 

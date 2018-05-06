@@ -4,15 +4,15 @@ $keyword = make_safe($_GET['k']);
 $page_id = make_safe($_GET['p']);
 
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-$result = mysqli_query($conn,"SELECT * FROM system_fields WHERE (name LIKE '%$keyword%' OR placeholder LIKE '%$keyword%' OR code LIKE '%$keyword%') ORDER BY code, id ASC");
+$result = mysqli_query($conn,"SELECT * FROM system_schools WHERE (school_name LIKE '%$keyword%' OR school_code LIKE '%$keyword%' OR school_description LIKE '%$keyword%' OR school_acronym LIKE '%$keyword%') ORDER BY id,school_code");
 ?>
-        <h2>Available Fields</h2>
+        <h2>Available Schools</h2>
         <div class="row">
                 <div class="col">
                   <form method="get" action="">
                   <div class="input-group">
                     <input type="hidden" name="p" id="p" value="<?php echo $page_id; ?>">
-                    <input type="text" class="form-control" name="k" id="k" placeholder="Search for available fields ..." style="max-width: 500px;" value="<?php echo $keyword; ?>">
+                    <input type="text" class="form-control" name="k" id="k" placeholder="Search for available school ..." style="max-width: 500px;" value="<?php echo $keyword; ?>">
                     <span class="input-group-btn">
                       <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></a></button>
                     </span>
@@ -28,11 +28,9 @@ $result = mysqli_query($conn,"SELECT * FROM system_fields WHERE (name LIKE '%$ke
                   <th>ID</th>
                   <th>Name</th>
                   <th>Code</th>
-                  <th>Placeholders</th>
-                  <th>Type</th>
-                  <th>Value</th>
-                  <th>Allowed Characters</th>
-                  <th>Actions</th>
+                  <th>Short Name</th>
+                  <th>Description</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -41,17 +39,20 @@ $result = mysqli_query($conn,"SELECT * FROM system_fields WHERE (name LIKE '%$ke
               $i = 0; 
               while($row = mysqli_fetch_array($result)){
                 $i++;
+                $school_id = $row['id'];
                 echo "<tr>";
-                echo "<td>" . $row['id'] . "</td>";
-                echo "<td>" . $row['name'] . "</td>";
-                echo "<td>" . $row['code'] . "</td>";
-                echo "<td>" . $row['placeholder'] . "</td>";
-                echo "<td>" . $row['type'] . "</td>";
-                echo "<td>" . $row['field_value'] . "</td>";
-                echo "<td>" . $row['valid_char'] . "</td>";
-                echo "<td>".printEditLink('edit-field','0','0','fid='.$row['id'].'');
-                if (( $row['form_link'] == "" ) && ( $row['entity_link'] == "")) {
-                  echo printDeleteLink('delete-field','0','0','f_id='.$row['id'].'');
+                echo "<td>" . $school_id . "</td>";
+                echo "<td>" . $row['school_name'] . "</td>";
+                echo "<td>" . $row['school_code'] . "</td>";
+                echo "<td>" . $row['school_acronym'] . "</td>";
+                echo "<td>" . $row['school_description'] . "</td>";
+                echo "<td>".printEditLink('edit-school','0','0','sid='.$row['id'].'');
+
+                $school_data_check = mysqli_query($conn,"SELECT * FROM system_users WHERE school_id = '$school_id';");
+                $count = mysqli_num_rows($school_data_check);
+
+                if ($count < 1) {
+                  echo printDeleteLink('delete-school','0','0','s_id='.$row['id'].'');
                 }
                 echo "</td>";
                 echo "</tr>";
@@ -68,7 +69,7 @@ $result = mysqli_query($conn,"SELECT * FROM system_fields WHERE (name LIKE '%$ke
               <div class="modal-dialog">
                   <div class="modal-content">
                       <div class="modal-header">
-                          Confirm Deletion of Field
+                          Confirm Deletion of School
                       </div>
                       <div class="modal-body">
                           This process cannot be undone. Press delete to proceed.

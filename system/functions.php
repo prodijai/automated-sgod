@@ -68,16 +68,28 @@ elseif (isset($_POST['add_field'])) {
 }
 elseif (isset($_POST['add_hnf'])) {
 
+	//global check
+	validateGlobalAccess('new-template');
+
+	$member_id = $_SESSION['member_id'];
+
 	$form_data = array(
 		'name' => make_safe($_POST['field_name']),
 		'content' => $_POST['field_content'],
-		'type' => make_safe($_POST['field_type'])
+		'type' => make_safe($_POST['field_type']),
+		'created_by' => $member_id
 	);
 
 	submitData($form_data,"new-template","system_reports_hnf",make_safe($_POST['name']));
 
 }
 elseif (isset($_POST['add_field_inside'])) {
+
+	$form_link = make_safe($_POST['field_form_link']);
+
+	//test user access
+	echo validateUserAccess("add-new-field-form","1",$form_link);
+
 	$form_data = array(
 		'name' => make_safe($_POST['field_name']),
 		'code' => make_safe($_POST['field_code']),
@@ -86,7 +98,7 @@ elseif (isset($_POST['add_field_inside'])) {
 		'field_value' => make_safe($_POST['field_value']),
 		'valid_char' => make_safe($_POST['field_valid_char']),
 		'required' => make_safe($_POST['field_required']),
-		'form_link' => make_safe($_POST['field_form_link']),
+		'form_link' => $form_link,
 		'entity_link' => make_safe($_POST['field_entity_link']),
 		'field_order' => make_safe($_POST['field_order'])
 	);
@@ -96,9 +108,13 @@ elseif (isset($_POST['add_field_inside'])) {
 
 	if ($form_code == NULL) {
 		$table = $entity_code;
+		// $permission_code = "add-new-field-entity";
+		// $link_id = "2";
 	}
 	else {
 		$table = $form_code;
+		// $permission_code = "add-new-field-entity";
+		// $link_id = "1";
 	}
 
 	switch (make_safe($_POST['field_type'])) {
@@ -139,47 +155,71 @@ elseif (isset($_POST['add_field_inside'])) {
 }
 elseif (isset($_POST['create_entity'])) {
 
+	//global check
+	validateGlobalAccess('new-entity');
+
+	$member_id = $_SESSION['member_id'];
+
 	$form_data = array(
 		'entity_name' => make_safe($_POST['entity_name']),
 		'entity_code' => make_safe($_POST['entity_code']),
 		'allow_login' => make_safe($_POST['enable_login']),
-		'entity_description' => make_safe($_POST['entity_desc'])
+		'entity_description' => make_safe($_POST['entity_desc']),
+		'created_by' => $member_id
 	);
 
 	submitData($form_data,"new-entity","system_entities",make_safe($_POST['entity_code']));
 
-	//create code field
-	$result0 = mysqli_query($conn,"SELECT * from system_entities WHERE entity_code = '".make_safe($_POST['entity_code'])."' LIMIT 1;");
-	$row0 = mysqli_fetch_array($result0);
+	// //create code field
+	// $result0 = mysqli_query($conn,"SELECT * from system_entities WHERE entity_code = '".make_safe($_POST['entity_code'])."' LIMIT 1;");
+	// $row0 = mysqli_fetch_array($result0);
 
-	$entity_id = $row0['id'];
-	$field_name = make_safe($_POST['entity_name'])." Code";
-	$field_code = make_safe($_POST['entity_code'])."_code";
-	$field_placeholder = make_safe($_POST['entity_name'])." unique code";
+	// $entity_id = $row0['id'];
+	// $field_name = make_safe($_POST['entity_name'])." Code";
+	// $field_code = make_safe($_POST['entity_code'])."_code";
+	// $field_placeholder = make_safe($_POST['entity_name'])." unique code";
 
-	$form_data = array(
-		'name' => $field_name,
-		'code' => $field_code,
-		'placeholder' => $field_placeholder,
-		'type' => 'text',
-		'field_value' => '',
-		'valid_char' => 'any',
-		'required' => 'required',
-		'form_link' => '',
-		'entity_link' => $entity_id,
-		'field_order' => '0'
-	);
+	// $form_data = array(
+	// 	'name' => $field_name,
+	// 	'code' => $field_code,
+	// 	'placeholder' => $field_placeholder,
+	// 	'type' => 'text',
+	// 	'field_value' => '',
+	// 	'valid_char' => 'any',
+	// 	'required' => 'required',
+	// 	'form_link' => '',
+	// 	'entity_link' => $entity_id,
+	// 	'field_order' => '0'
+	// );
 
-	submitData($form_data,"new-entity","system_fields",$field_code);
+	// submitData($form_data,"new-entity","system_fields",$field_code);
 
 }
+elseif (isset($_POST['new-school'])) {
+	$form_data = array(
+		'school_name' => make_safe($_POST['school_name']),
+		'school_code' => make_safe($_POST['school_code']),
+		'school_acronym' => make_safe($_POST['school_acronym']),
+		'school_description' => make_safe($_POST['school_desc'])
+	);
+
+	$custom_success_message = "<em>".make_safe($_POST['school_name'])."</em> has been added.";
+
+	submitData($form_data,"new-school","system_schools",make_safe($_POST['school_code']),$custom_success_message);
+}
 elseif (isset($_POST['new_form'])) {
+
+	//global check
+	validateGlobalAccess('new-form');
+
+	$member_id = $_SESSION['member_id'];
 
 	$form_data = array(
 		'form_name' => make_safe($_POST['form_name']),
 		'form_code' => make_safe($_POST['form_code']),
 		'form_description' => make_safe($_POST['form_desc']),
-		'form_entity_link' => make_safe($_POST['form_link'])
+		'form_entity_link' => make_safe($_POST['form_link']),
+		'created_by' => $member_id
 	);
 
 	$entity_id = make_safe($_POST['form_link']);
@@ -235,9 +275,13 @@ elseif (isset($_POST['save-entity'])) {
 }
 elseif (isset($_POST['save-form-data'])) {
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+	$form_id = $_POST['form_id'];
 	
 	$table_name = 'usr_' . make_safe($_POST['form_code']);
 	$field_code = 'unique_code';
+
+	// test if user has this permission function - 1 means forms
+	$test = validateUserAccess('input-form','1',$form_id);
 
 	// echo $table_name;
 
@@ -268,6 +312,9 @@ elseif (isset($_POST['save_config_report'])) {
 
 	$report_id = make_safe($_POST['report_code']);
 
+	// test user permission
+	validateUserAccess("configure-report",'3',$report_id);
+
 	// drop report field configs before adding new
 	dbRowDelete('system_reports_config', "WHERE report_id = '$report_id'");
 	
@@ -291,6 +338,10 @@ elseif (isset($_POST['save_config_report'])) {
 	}  
 }
 elseif (isset($_POST['new_report'])) {
+	//test permission
+	validateGlobalAccess('new_report');
+	$member_id = $_SESSION['member_id'];
+
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
 	$report_name = make_safe($_POST['report_name']);
@@ -307,7 +358,8 @@ elseif (isset($_POST['new_report'])) {
 			'report_description' => $report_description,
 			'form_link' => $report_link,
 			'report_header' => $report_header,
-			'report_footer' => $report_footer
+			'report_footer' => $report_footer,
+			'created_by' => $member_id
 		);
 
 		submitData($form_data,"new-report","system_reports",$report_code,"Added New Report","false");
@@ -315,15 +367,21 @@ elseif (isset($_POST['new_report'])) {
 		header('location:'.$site_root.'?p=configure-report&r_code='.$report_code.'');
 }
 elseif (isset($_POST['save_config_permission'])) {
+
+	//global check
+	validateGlobalAccess('list-permissions');
+
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-	$permissions = mysqli_query($conn,"SELECT * FROM system_permissions ORDER BY id");
+	$school_id = make_safe($_POST['school_id']);
+	$permissions = mysqli_query($conn,"SELECT * FROM system_permissions WHERE permission_type = '0' ORDER BY id");
 	$entity = mysqli_query($conn,"SELECT * FROM system_entities WHERE allow_login = 'yes' ORDER BY id");
 
-	#drop database daata
-	dbRowDelete("system_permissions_config", "WHERE id > 0");
+	#drop database data
+	dbRowDelete("system_permissions_config", "WHERE link_id = 0 AND school_id = '$school_id'");
 
 	$i = 0; 
 	while($permission_row = mysqli_fetch_array($permissions)){
+		
 		$i++;
 		$perm_id = $permission_row['id'];
 	    
@@ -340,7 +398,8 @@ elseif (isset($_POST['save_config_permission'])) {
 
 			$form_data = array(
 				'permission_id' => $perm_id,
-				'entity_id' => $entity_id
+				'entity_id' => $entity_id,
+				'school_id' => $school_id 
 			);
 
 	      	#insert to database
@@ -353,9 +412,260 @@ elseif (isset($_POST['save_config_permission'])) {
 	}
 
 	#Redirect to original page
-	header('location:'.$site_root.'?p=list-permissions');
+	header('location:'.$site_root.'?p=list-permissions&sid='.$school_id.'');
 }
+elseif (isset($_POST['save_form_permission'])) {
+	
+	$form_id = make_safe($_POST['form_id']);
+	$form_code = make_safe($_POST['form_code']);
+
+
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+	$permissions = mysqli_query($conn,"SELECT * FROM system_permissions WHERE permission_type = '1' ORDER BY id");
+	$entities = mysqli_query($conn,"SELECT * FROM system_entities WHERE allow_login = 'yes' ORDER BY id");
+	$schools = mysqli_query($conn,"SELECT * FROM system_schools ORDER BY id");
+
+	$a = 0; 
+	while($school = mysqli_fetch_array($schools)){
+		$a++;
+
+		mysqli_data_seek($permissions, 0);
+		$b = 0;
+
+		while($permission = mysqli_fetch_array($permissions)){
+			$b++;
+
+			$permission_id = $permission['id'];
+			$school_id = $school['id'];
+			#drop database data where form id (link id) = passed
+			dbRowDelete("system_permissions_config", "WHERE link_id = $form_id AND permission_id = '$permission_id' AND school_id = '$school_id'");
+			
+			mysqli_data_seek($entities, 0);
+			$c = 0;
+
+			while($entity = mysqli_fetch_array($entities)){
+				$c++;
+
+				$permission_key = $permission['id'] . "_" . $entity['id'] . "_" . $school['id'];
+
+				if($_POST["$permission_key"] == "on") {
+
+					$form_data = array(
+						'permission_id' => $permission['id'],
+						'entity_id' => $entity['id'],
+						'link_id' => $form_id,
+						'school_id' => $school['id']
+					);
+
+					#insert to database
+			      	dbInsertData("system_permissions_config",$form_data);
+				}
+
+			}
+
+		}
+
+	}
+
+	#Redirect to original page
+	header('location:'.$site_root.'?p=list-form-permissions&f='.$form_code.'&fid='.$form_id.'');
+
+}
+
+elseif (isset($_POST['save_entity_permission'])) {
+
+	//global check
+	validateGlobalAccess('list-entity-permissions');
+	
+	$entity_id = make_safe($_POST['entity_id']);
+	$entity_code = make_safe($_POST['entity_code']);
+
+
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+	$permissions = mysqli_query($conn,"SELECT * FROM system_permissions WHERE permission_type = '2' ORDER BY id");
+	$entities = mysqli_query($conn,"SELECT * FROM system_entities WHERE allow_login = 'yes' ORDER BY id");
+	$schools = mysqli_query($conn,"SELECT * FROM system_schools ORDER BY id");
+
+
+	$a = 0; 
+	while($school = mysqli_fetch_array($schools)){
+		$a++;
+
+		mysqli_data_seek($permissions, 0);
+		$b = 0;
+
+		while($permission = mysqli_fetch_array($permissions)){
+			$b++;
+
+			$permission_id = $permission['id'];
+			$school_id = $school['id'];
+			// echo $permission_id . " " . $entity_id . "<br> ";
+			#drop database data where form id (link id) = passed
+			dbRowDelete("system_permissions_config", "WHERE link_id = $entity_id AND permission_id = '$permission_id' AND school_id = '$school_id'");
+			// echo "<br>";
+			
+			mysqli_data_seek($entities, 0);
+			$c = 0;
+
+			while($entity = mysqli_fetch_array($entities)){
+				$c++;
+
+				$permission_key = $permission['id'] . "_" . $entity['id'] . "_" . $school['id'];
+
+				if($_POST["$permission_key"] == "on") {
+
+					$entity_data = array(
+						'permission_id' => $permission['id'],
+						'entity_id' => $entity['id'],
+						'link_id' => $entity_id,
+						'school_id' => $school['id']
+					);
+
+					
+					// print_r($entity_data);
+					// echo "<br>";
+					#insert to database
+			      	dbInsertData("system_permissions_config",$entity_data);
+				}
+
+			}
+
+		}
+
+	}
+
+	#Redirect to original page
+	header('location:'.$site_root.'?p=list-entity-permissions&e='.$entity_code.'&eid='.$entity_id.'');
+
+}
+elseif (isset($_POST['save_report_permission'])) {
+
+	//global check
+	validateGlobalAccess('list-report-permissions');
+	
+	$report_id = make_safe($_POST['report_id']);
+	$report_code = make_safe($_POST['report_code']);
+
+
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+	$permissions = mysqli_query($conn,"SELECT * FROM system_permissions WHERE permission_type = '3' ORDER BY id");
+	$entities = mysqli_query($conn,"SELECT * FROM system_entities WHERE allow_login = 'yes' ORDER BY id");
+	$schools = mysqli_query($conn,"SELECT * FROM system_schools ORDER BY id");
+
+	$a = 0; 
+	while($school = mysqli_fetch_array($schools)){
+		$a++;
+
+		mysqli_data_seek($permissions, 0);
+		$b = 0;
+
+		while($permission = mysqli_fetch_array($permissions)){
+			$b++;
+			
+			$permission_id = $permission['id'];
+			$school_id = $school['id'];
+			#drop database data where form id (link id) = passed
+			dbRowDelete("system_permissions_config", "WHERE link_id = $report_id AND permission_id = '$permission_id' AND school_id = '$school_id'");
+
+			mysqli_data_seek($entities, 0);
+			$c = 0;
+
+			while($entity = mysqli_fetch_array($entities)){
+				$c++;
+
+				$permission_key = $permission['id'] . "_" . $entity['id'] . "_" . $school['id'];
+
+				if($_POST["$permission_key"] == "on") {
+
+					$report_data = array(
+						'permission_id' => $permission['id'],
+						'entity_id' => $entity['id'],
+						'link_id' => $report_id,
+						'school_id' => $school['id']
+					);
+
+					#insert to database
+			      	dbInsertData("system_permissions_config",$report_data);
+				}
+
+			}
+
+		}
+
+	}
+
+	#Redirect to original page
+	header('location:'.$site_root.'?p=list-report-permissions&rcode='.$report_code.'&rid='.$report_id.'');
+
+}
+elseif (isset($_POST['save_template_permission'])) {
+
+	//global check
+	validateGlobalAccess('list-template-permissions');
+	
+	$template_id = make_safe($_POST['template_id']);
+
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+	$permissions = mysqli_query($conn,"SELECT * FROM system_permissions WHERE permission_type = '4' ORDER BY id");
+	$entities = mysqli_query($conn,"SELECT * FROM system_entities WHERE allow_login = 'yes' ORDER BY id");
+	$schools = mysqli_query($conn,"SELECT * FROM system_schools ORDER BY id");
+	
+
+	$a = 0; 
+	while($school = mysqli_fetch_array($schools)){
+		$a++;
+
+		mysqli_data_seek($permissions, 0);
+		$b = 0;
+
+		while($permission = mysqli_fetch_array($permissions)){
+			$b++;
+
+			$permission_id = $permission['id'];
+			$school_id = $school['id'];
+			#drop database data where form id (link id) = passed
+			dbRowDelete("system_permissions_config", "WHERE link_id = $template_id AND permission_id = '$permission_id' AND school_id = '$school_id'");
+			
+			mysqli_data_seek($entities, 0);
+			$c = 0;
+
+			while($entity = mysqli_fetch_array($entities)){
+				$c++;
+
+				$permission_key = $permission['id'] . "_" . $entity['id'] . "_" . $school['id'];
+
+				if($_POST["$permission_key"] == "on") {
+
+					$template_data = array(
+						'permission_id' => $permission['id'],
+						'entity_id' => $entity['id'],
+						'link_id' => $template_id,
+						'school_id' => $school['id']
+					);
+
+					#insert to database
+			      	dbInsertData("system_permissions_config",$template_data);
+				}
+
+			}
+
+		}
+
+	}
+
+	#Redirect to original page
+	header('location:'.$site_root.'?p=list-template-permissions&tid='.$template_id.'');
+
+}
+
 elseif (isset($_POST['edit-entity'])) {
+
+	//global check
+	validateGlobalAccess('edit-entity');
 
 	$row_id = make_safe($_POST['entity_id']);
 
@@ -368,7 +678,23 @@ elseif (isset($_POST['edit-entity'])) {
 	$custom_message = "Entity <em>".make_safe($_POST['entity_name'])."</em> successfully updated.";
 	updateData($form_data,'edit-entity','system_entities',$row_id,$custom_message);
 }
+elseif (isset($_POST['edit-school'])) {
+	$row_id = make_safe($_POST['schoold_id']);
+
+	$form_data = array(
+		'school_name' => make_safe($_POST['school_name']),
+		'school_acronym' => make_safe($_POST['school_acronym']),
+		'school_description' => make_safe($_POST['school_desc'])
+	);
+
+	$custom_message = "School <em>".make_safe($_POST['school_name'])."</em> successfully updated.";
+	updateData($form_data,'edit-school','system_schools',$row_id,$custom_message);
+
+}
 elseif (isset($_POST['edit-form'])) {
+
+	//global check
+	validateGlobalAccess('edit-form');
 
 	$row_id = make_safe($_POST['form_id']);
 
@@ -384,6 +710,9 @@ elseif (isset($_POST['edit-form'])) {
 elseif (isset($_POST['edit-report'])) {
 
 	$row_id = make_safe($_POST['report_id']);
+
+	// test user permission
+	validateUserAccess("edit-report",'3',$row_id);
 
 	$form_data = array(
 		'report_name' => make_safe($_POST['report_name']),
@@ -412,6 +741,9 @@ elseif (isset($_POST['edit-template'])) {
 }
 elseif (isset($_POST['edit-field'])) {
 
+	//global check
+	validateGlobalAccess('edit-field');
+
 	$row_id = make_safe($_POST['field_id']);
 
 	$form_data = array(
@@ -431,6 +763,10 @@ elseif (isset($_POST['edit-field'])) {
 elseif (isset($_POST['edit-entity-data'])) {
 
 	$row_id = make_safe($_POST['userid']);
+	$entity_id = make_safe($_POST['entity_id']);
+
+	// test user permission
+	validateUserAccess("edit-entity-data",'2',$entity_id);
 
 	$form_data = array(
 		'first_name' => make_safe($_POST['first_name']),
@@ -438,7 +774,8 @@ elseif (isset($_POST['edit-entity-data'])) {
 		'last_name' => make_safe($_POST['last_name']),
 		'email' => make_safe($_POST['email']),
 		'mobile' => make_safe($_POST['mobile']),
-		'username' => make_safe($_POST['username'])
+		'username' => make_safe($_POST['username']),
+		'school_id' => make_safe($_POST['school_id'])
 	);
 
 	$custom_message = "Entity <em>".make_safe($_POST['unique_code'])."</em> successfully updated.";
@@ -446,6 +783,7 @@ elseif (isset($_POST['edit-entity-data'])) {
 
 }
 elseif (isset($_POST['edit-form-data'])) {
+	$form_id = $_POST['form_id'];
 
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
@@ -453,6 +791,9 @@ elseif (isset($_POST['edit-form-data'])) {
 	
 	$table_name = 'usr_' . make_safe($_POST['form_code']);
 	$field_code = 'unique_code';
+
+	// test if user has this permission function - 1 means forms
+	$test = validateUserAccess('edit-form-data','1',$form_id);
 
 	// echo $table_name;
 
@@ -488,19 +829,26 @@ elseif (isset($_POST['save-entity-new'])) {
 	$email = make_safe($_POST['email']);
 	$first_name = make_safe($_POST['first_name']);
 	$last_name = make_safe($_POST['last_name']);
+	$middle_name = make_safe($_POST['middle_name']);
 	$unique_code = make_safe($_POST['unique_code']);
 	$hashed_password = sha1(make_safe($_POST['password']));
+	$entity_id = make_safe($_POST['entity_code']);
+	$created_by = $_SESSION['member_id'];
+
+	validateUserAccess("input-entity",'2',$entity_id);
 
 	$form_data = array(
 		'username' => $email,
 		'password' => $hashed_password,
 		'first_name' => $first_name,
-		'middle_name' => $last_name,
-		'last_name' => make_safe($_POST['last_name']),
+		'middle_name' => $middle_name,
+		'last_name' => $last_name,
 		'unique_code' => $unique_code,
-		'entity_id' => make_safe($_POST['entity_code']),
+		'entity_id' => $entity_id,
 		'email' => $email,
-		'mobile' => make_safe($_POST['mobile'])
+		'mobile' => make_safe($_POST['mobile']),
+		'school_id' => make_safe($_POST['school_id']),
+		'created_by' => $created_by
 	);
 
 	$custom_message = $first_name." ".$last_name." with unique code ".$unique_code.". ";
@@ -535,6 +883,7 @@ function validateLogin($username,$password){
 		$_SESSION['firstname']=$row['first_name'];
 		$_SESSION['lastname']=$row['last_name'];
 		$_SESSION['entity_id']=$row['entity_id'];
+		$_SESSION['school_id']=$row['school_id'];
 
 		header('location:'.$site_root.'?');
 	}else{
@@ -562,73 +911,326 @@ function validateSession(){
 	}
 }
 
-function validateAccess($page_id){
+// function validateAccess($page_id){
+// 	$session_entity_id = $_SESSION['entity_id'];
+
+// 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+// 	if ($page_id == "403" || $page_id == "404" || $page_id == "" || $session_entity_id == "0") {
+// 		$count = "1";
+// 	} else {
+// 		$permission_list = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id='$session_entity_id' AND system_permissions.code='$page_id';");
+// 		$count=mysqli_num_rows($permission_list);
+// 	}
+
+// 	if ($count < 1){
+// 		header('location:'.$site_root.'?p=403');
+// 	}
+// }
+
+// function validatePermission($feature_code){
+// 	$session_entity_id = $_SESSION['entity_id'];
+// 	$permission_code = make_safe($feature_code);
+
+// 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+// 	// $sql = "SELECT * FROM system_permissions 
+// 	//         INNER JOIN system_permissions_config 
+// 	//         ON system_permissions_config.permission_id = system_permissions.id 
+// 	//         WHERE system_permissions_config.entity_id='$session_entity_id'
+// 	//         AND system_permissions_config.entity_id='$permission_code' 
+// 	//         AND system_permissions.code='$permission_code'";
+
+
+// 	if ($session_entity_id == "0") {
+// 		return "200";
+// 	} else {
+// 		$permission_list = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id='$session_entity_id' AND system_permissions.code='$permission_code';");
+// 		$count=mysqli_num_rows($permission_list);
+
+// 		if ($count > 0) {
+// 			return "200";
+// 		} else {
+// 			return "403";
+// 		}
+// 	}
+
+// }
+
+########## new validation functions
+
+function validateUserPermission($permission_code,$permission_type,$link_id,$table_name){
 	$session_entity_id = $_SESSION['entity_id'];
+	$session_school_id = $_SESSION['school_id'];
+	$permission_code = make_safe($permission_code);
+	$permission_type = make_safe($permission_type);
+	$link_id = make_safe($link_id);
 
-	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-
-	if ($page_id == "403" || $page_id == "404" || $page_id == "" || $session_entity_id == "0") {
-		$count = "1";
+	if ($session_entity_id == "0") {
+		return "200";
 	} else {
-		$permission_list = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id='$session_entity_id' AND system_permissions.code='$page_id';");
-		$count=mysqli_num_rows($permission_list);
-	}
 
-	if ($count < 1){
-		header('location:'.$site_root.'?p=403');
+		//creator check
+		switch ($permission_type) {
+			case '1':
+				$table_name = "system_forms";
+				break;
+			case '2':
+				$table_name = "system_entities";
+				break;
+			case '3':
+				$table_name = "system_reports";
+				break;
+			case '4':
+				$table_name = "system_reports_hnf";
+				break;
+			
+			default:
+				# code...
+				break;
+		}
+		$creator_check = validateCreator($table_name,$link_id);
+
+		if ($creator_check == "200") {
+			return "200";
+		}
+		else {
+			include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+			$sql = "SELECT * FROM system_permissions 
+		        INNER JOIN system_permissions_config 
+		        ON system_permissions_config.permission_id = system_permissions.id 
+		        WHERE system_permissions.permission_type = '$permission_type'
+		        AND system_permissions_config.entity_id='$session_entity_id'
+		        AND system_permissions_config.link_id='$link_id' 
+		        AND system_permissions_config.school_id='$session_school_id'
+		        AND system_permissions.code='$permission_code'";
+
+		    $permission_list = mysqli_query($conn,$sql);
+			$count=mysqli_num_rows($permission_list);
+
+			if ($count > 0) {
+				return "200";
+			} else {
+				return "403";
+			}
+		}		
+
 	}
+	
 }
 
-function validatePermission($feature_code){
-	$session_entity_id = $_SESSION['entity_id'];
-	$permission_code = make_safe($feature_code);
+function validateUserAccess($permission_code,$permission_type,$link_id,$table_name){
 
+	$session_entity_id = $_SESSION['entity_id'];
+
+	//contains site root variable
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+
+	if ($permission_code == "403" || $permission_code == "404" || $permission_code == "" || $session_entity_id == "0") {
+		$accessCode = "200";
+	} else {
+		$accessCode = validateUserPermission($permission_code,$permission_type,$link_id,$table_name);
+	}
+
+	if ($accessCode != "200"){
+		header('location:'.$site_root.'?p=403');
+
+		// assurance that the page will redirect
+		echo "<script>
+			    window.location = '$site_root?p=403';
+			</script>";
+
+		// exit script	
+		exit();
+	}
+
+
+}
+function validateGlobalPermission($permission_code){
+	$session_entity_id = $_SESSION['entity_id'];
+	$session_school_id = $_SESSION['school_id'];
+	$permission_type = "0";
+	$permission_code = make_safe($permission_code);	
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
 	if ($session_entity_id == "0") {
 		return "200";
 	} else {
-		$permission_list = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id='$session_entity_id' AND system_permissions.code='$permission_code';");
-		$count=mysqli_num_rows($permission_list);
 
-		if ($count > 0) {
-			return "200";
+		//check if it's a global permission, if not, check if there's an entry
+		$sql = "SELECT * FROM system_permissions WHERE code = '$permission_code' AND permission_type = '$permission_type'";
+
+		$global_check = mysqli_query($conn,$sql);
+		$first_counter = mysqli_num_rows($global_check);
+
+		if ($first_counter > 0) {
+			
+			$sql2 = "SELECT * FROM system_permissions 
+		        INNER JOIN system_permissions_config 
+		        ON system_permissions_config.permission_id = system_permissions.id 
+		        WHERE system_permissions.permission_type = '$permission_type'
+		        AND system_permissions_config.entity_id='$session_entity_id'
+		        AND system_permissions_config.school_id='$session_school_id'
+		        AND system_permissions.code='$permission_code'";
+
+		    $global_check_value = mysqli_query($conn,$sql2);
+		    $second_counter = mysqli_num_rows($global_check_value);
+
+		    if ($second_counter > 0) {
+	        	return "200";
+	        } else {
+	        	return "403";
+	        }
+
 		} else {
-			return "403";
-		}
+
+			//check if there's an entry in the database permissions
+			//if there are no entries, page is insecure, automatically redirect 403
+			$sql = "SELECT * FROM system_permissions WHERE code = '$permission_code'";
+
+			$check_entry = mysqli_query($conn,$sql);
+			$third_check = mysqli_num_rows($check_entry);
+
+			if ($third_check > 0) {
+				return "200";
+			} else {
+				// by default, all pages are restricted
+				return "403";
+			}
+
+			
+		}	
+
 	}
 
+	// link id = 0
+	// permission_type = 0
+
+	// if page permission type not zero, equals 200
+	// if page permission type equals zero, with output = 200
+	// if page permission type equals zero, no output = 403
+
+	// check for schoold_id and entity_id
 }
 
-function printDeleteLink($page_id,$params){
-	$accessPermission = validatePermission($page_id);
+function validateGlobalAccess($permission_code){
+	$session_entity_id = $_SESSION['entity_id'];
+
+	//contains site root variable
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+
+	if ($permission_code == "403" || $permission_code == "404" || $permission_code == "" || $session_entity_id == "0") {
+		$accessCode = "200";
+	} else {
+		// $accessCode = validateUserPermission($permission_code,$permission_type,$link_id,$table_name);
+		$accessCode = validateGlobalPermission($permission_code);
+	}
+
+	if ($accessCode != "200"){
+		header('location:'.$site_root.'?p=403');
+
+		// assurance that the page will redirect
+		echo "<script>
+			    window.location = '$site_root?p=403';
+			</script>";
+
+		// exit script	
+		exit();
+	}
+}
+
+function validateCreator($table_name,$entry_id){
+	$session_member_id = $_SESSION['member_id'];
+
+	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+	$sql = "SELECT * FROM $table_name 
+	        WHERE created_by = '$session_member_id'
+	        AND id = '$entry_id'";
+
+	$creator_check = mysqli_query($conn,$sql);
+	$count=mysqli_num_rows($creator_check);
+
+
+	if ($count > 0) {
+		return "200";
+	} else {
+		return "403";
+	}
+
+
+}
+// function applyPermissions($permission_list,$link_id){
+
+// 	$arrlength = count($permission_list);
+// 	$session_school_id = ;
+// 	$session_en
+
+// 	for($x = 0; $x < $arrlength; $x++) {
+	    
+// 	    echo $permission_list[$x];
+// 		echo "<br>";
+    	
+//     	$form_data = array(
+// 			'permission_id' => $permission_list[$x],
+// 			'entity_id' => ,
+// 			'link_id' => ,
+// 			'school_id' => 
+// 		);
+
+// 		dbInsertData("system_permissions_config", $form_data);
+	    
+// 	}
+
+// }
+
+//////// end of validator functions
+
+function printDeleteLink($page_id,$permission_type,$link_id,$params){
+	// $accessPermission = validatePermission($page_id);
+	$accessPermission = validateUserPermission($page_id,$permission_type,$link_id);
 	if ($accessPermission == "200") {
 		return '<a class="btn btn-danger btn-sm" href="#" data-href="system/delete.php?a='.$page_id.'&'.$params.'" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-trash"></i></a>&nbsp;';
 	}
 }
 
-function printViewLink($page_id,$params){
-	$accessPermission = validatePermission($page_id);
+function printViewLink($page_id,$permission_type,$link_id,$params){
+	// $accessPermission = validatePermission($page_id);
+	$accessPermission = validateUserPermission($page_id,$permission_type,$link_id);
 	if ($accessPermission == "200") {
 		return '<a class="btn btn-primary btn-sm" href="?p='.$page_id.'&'.$params.'"><i class="fa fa-eye"></i></a>&nbsp;';
 	}
 }
 function printViewReport($report_id,$params){
-	$accessPermission = validatePermission('view-report');
+	// $accessPermission = validatePermission('view-report');
+	$accessPermission = validateUserPermission('view-report','3',$report_id);
+
 	if ($accessPermission == "200") {
 		return '<a class="btn btn-primary btn-sm" href="system/reports.php?r_id='.$report_id.'&'.$params.'" target="_new"><i class="fa fa-print"></i></a>&nbsp;';
 	}
 }
-function printInputLink($page_id,$params){
-	$accessPermission = validatePermission($page_id);
+function printInputLink($page_id,$permission_type,$link_id,$params){
+	// $accessPermission = validatePermission($page_id);
+	$accessPermission = validateUserPermission($page_id,$permission_type,$link_id);
 	if ($accessPermission == "200") {
 		return '<a class="btn btn-success btn-sm" href="?p='.$page_id.'&'.$params.'"><i class="fa fa-plus-circle"></i></a>&nbsp;';
 	}
 }
-function printEditLink($page_id,$params){
-	$accessPermission = validatePermission($page_id);
+function printEditLink($page_id,$permission_type,$link_id,$params){
+	// $accessPermission = validatePermission($page_id);
+	$accessPermission = validateUserPermission($page_id,$permission_type,$link_id);
 	if ($accessPermission == "200") {
 		return '<a class="btn btn-warning btn-sm" href="?p='.$page_id.'&'.$params.'"><i class="fa fa-edit"></i></a>&nbsp;';
+	}
+}
+function printPermissionLink($page_id,$params){
+	// $accessPermission = validatePermission($page_id);
+	$accessPermission = validateUserPermission($page_id,'0','0');
+	if ($accessPermission == "200") {
+		return '<a class="btn btn-secondary btn-sm" href="?p='.$page_id.'&'.$params.'"><i class="fa fa-lock"></i></a>&nbsp;';
 	}
 }
 
@@ -651,8 +1253,12 @@ function submitData($form_data,$page_id,$table_name,$column_code,$custom_success
 	// for the app to know where page to print message
 	$_SESSION['action_result_page'] = $page_id;
 
-	if(checkIfDataExist($table_name,$column_code,$field_code)) {
-		$_SESSION['action_result_message'] = '<strong>Oooppss!</strong> A duplicate code in ('.$column_code.') exists.';
+	$field_value = $form_data[$column_code];
+
+	echo $field_value;
+
+	if(checkIfDataExist($table_name,$column_code,$field_value)) {
+		$_SESSION['action_result_message'] = '<strong>Oooppss!</strong> A duplicate entry with the same ('.$column_code.') exists.';
 		$_SESSION['action_notif_type'] = 'alert-warning';
 	}
 	else {
@@ -747,7 +1353,7 @@ function renderField($type,$placeholder,$required,$value,$name,$code,$current_va
 	}
 
 	echo '  <div class="form-group">
-                <label for="'.$code.'">'.printEditLink('edit-field','fid='.$code.'') . printDeleteLink('delete-form-field','fcode='.$code.''). ' ' .$name. ' '.$asterisk.'</label>';
+                <label for="'.$code.'">'.printEditLink('edit-field','0','0','fid='.$code.'') . printDeleteLink('delete-form-field','0','0','fcode='.$code.''). ' ' .$name. ' '.$asterisk.'</label>';
 
     switch ($type) {
     	case 'text':
@@ -941,7 +1547,7 @@ function dbCreateTable($entity_code,$form_code){
 	$code_column = "unique_code";
 
 	
-	$sql = "CREATE TABLE $table_name ( id INT NULL AUTO_INCREMENT PRIMARY KEY, date_added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, user_id VARCHAR(255) NOT NULL , $code_column VARCHAR(255) NOT NULL  ) ENGINE = InnoDB";
+	$sql = "CREATE TABLE $table_name ( id INT NULL AUTO_INCREMENT PRIMARY KEY, date_added TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, created_by VARCHAR(255) NOT NULL , $code_column VARCHAR(255) NOT NULL  ) ENGINE = InnoDB";
 
 	// run and return the query result resource
 	if ($conn->query($sql) === TRUE) {
@@ -981,9 +1587,10 @@ function addColumnToTable($table_name,$column_name,$type,$max_char){
 function createSidebarMenu($friendly_name,$page_id,$current_page){
 
 	$session_entity_id = $_SESSION['entity_id'];
+	$session_school_id = $_SESSION['school_id'];
 
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-	$permission_list = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id='$session_entity_id' AND system_permissions.code='$page_id';");
+	$permission_list = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id='$session_entity_id' AND system_permissions_config.school_id='$session_school_id' AND system_permissions.code='$page_id';");
 	$count=mysqli_num_rows($permission_list);
 
 
@@ -1026,73 +1633,120 @@ function listAvailableForms($current_page){
 	$session_entity_id = $_SESSION['entity_id'];
 
 
-	if ($session_entity_id == 0) {
-		$count = '1';
+	if ($session_entity_id  == '0') {
+	  $permission_code = "%";
+	  $entity_id = "%";
+	  $school_id = "%";
 	} else {
-		$permission_check = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id=$session_entity_id AND (system_permissions.code = 'input-form' OR system_permissions.code = 'list-forms' );");
-		$count = mysqli_num_rows($permission_check);
+	  $permission_code = "input-form";
+	  $entity_id = $_SESSION['entity_id'];
+	  $school_id = $_SESSION['school_id'];
 	}
 
+	$sql = "SELECT DISTINCT(system_forms.form_name),system_forms.form_code,system_forms.form_description,system_forms.id 
+	        FROM system_forms 
+	        INNER JOIN system_permissions_config ON system_permissions_config.link_id = system_forms.id 
+	        INNER JOIN system_permissions ON system_permissions.id = system_permissions_config.permission_id 
+	        WHERE system_permissions.permission_type = 1 AND 
+	        system_permissions.code like '$permission_code' AND 
+	        system_permissions_config.entity_id like '$entity_id' AND 
+	        system_permissions_config.school_id like '$school_id'
+	        ORDER BY system_forms.id, system_forms.form_code LIMIT 4";
 
-	if ($count > 0) {
-		
-		$result = mysqli_query($conn,"SELECT * FROM system_forms LIMIT 4;");
+	$result = mysqli_query($conn,$sql);
 
-		$i = 0; 
-		while($row = mysqli_fetch_array($result)){
-			$nav_class="";
-		    $i++;
+	$i = 0; 
+	while($row = mysqli_fetch_array($result)){
+		$nav_class="";
+	    $i++;
 
-			if ($current_page == $row['form_code']) {
-				$nav_class="active";
-			}
-			elseif ($current_page == "disabled") {
-				$nav_class="disabled";
-			}
-
-			echo '<li class="nav-item"><a class="nav-link '.$nav_class.'" href="?p=input-form&f='.$row['form_code'].'&fid='.$row['id'].'">'.$row['form_name'].'</a></li>';
+		if ($current_page == $row['form_code']) {
+			$nav_class="active";
 		}
-		
-		mysqli_close($conn);
+		elseif ($current_page == "disabled") {
+			$nav_class="disabled";
+		}
+
+		echo '<li class="nav-item"><a class="nav-link '.$nav_class.'" href="?p=input-form&f='.$row['form_code'].'&fid='.$row['id'].'">'.$row['form_name'].'</a></li>';
 	}
+
+
 }
 
 function listEntities($current_page){
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
-
 	$session_entity_id = $_SESSION['entity_id'];
 
 
-	if ($session_entity_id == 0) {
-		$count = '1';
+	if ($session_entity_id  == '0') {
+	  $permission_code = "%";
+	  $entity_id = "%";
+	  $school_id = "%";
 	} else {
-		$permission_check = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id=$session_entity_id AND (system_permissions.code = 'input-entities' OR system_permissions.code = 'list-entities' );");
-		$count = mysqli_num_rows($permission_check);
+	  $permission_code = "input-entity";
+	  $entity_id = $_SESSION['entity_id'];
+	  $school_id = $_SESSION['school_id'];
 	}
+
+	$sql = "SELECT DISTINCT(system_entities.entity_name),system_entities.entity_code,system_entities.entity_description,system_entities.id 
+	        FROM system_entities 
+	        INNER JOIN system_permissions_config ON system_permissions_config.link_id = system_entities.id 
+	        INNER JOIN system_permissions ON system_permissions.id = system_permissions_config.permission_id 
+	        WHERE system_permissions.permission_type = 2 AND 
+	        system_permissions.code like '$permission_code' AND 
+	        system_permissions_config.entity_id like '$entity_id' AND 
+	        system_permissions_config.school_id like '$school_id'
+	        ORDER BY system_entities.id, system_entities.entity_code LIMIT 4";
+
+
+
+
+	// if ($session_entity_id == 0) {
+	// 	$count = '1';
+	// } else {
+	// 	$permission_check = mysqli_query($conn,"SELECT * from system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions_config.entity_id=$session_entity_id AND (system_permissions.code = 'input-entities' OR system_permissions.code = 'list-entities' );");
+	// 	$count = mysqli_num_rows($permission_check);
+	// }
 	
 
-	if ($count > 0) {
+	// if ($count > 0) {
 
-		$result = mysqli_query($conn,"SELECT * FROM system_entities LIMIT 4;");
+	// 	$result = mysqli_query($conn,"SELECT * FROM system_entities LIMIT 4;");
 
 
-		$i = 0; 
-		while($row = mysqli_fetch_array($result)){
-			$nav_class="";
-		    $i++;
+	// 	$i = 0; 
+	// 	while($row = mysqli_fetch_array($result)){
+	// 		$nav_class="";
+	// 	    $i++;
 
-			if ($current_page == $row['entity_code']) {
-				$nav_class="active";
-			}
-			elseif ($current_page == "disabled") {
-				$nav_class="disabled";
-			}
+	// 		if ($current_page == $row['entity_code']) {
+	// 			$nav_class="active";
+	// 		}
+	// 		elseif ($current_page == "disabled") {
+	// 			$nav_class="disabled";
+	// 		}
 
-			echo '<li class="nav-item"><a class="nav-link '.$nav_class.'" href="?p=input-entity&e='.$row['entity_code'].'&eid='.$row['id'].'">'.$row['entity_name'].'</a></li>';
-		}
+	// 		echo '<li class="nav-item"><a class="nav-link '.$nav_class.'" href="?p=input-entity&e='.$row['entity_code'].'&eid='.$row['id'].'">'.$row['entity_name'].'</a></li>';
+	// 	}
 		
-		mysqli_close($conn);
+	// }
+
+	$result = mysqli_query($conn,$sql);
+
+	$i = 0; 
+	while($row = mysqli_fetch_array($result)){
+		$nav_class="";
+	    $i++;
+
+		if ($current_page == $row['entity_code']) {
+			$nav_class="active";
+		}
+		elseif ($current_page == "disabled") {
+			$nav_class="disabled";
+		}
+
+		echo '<li class="nav-item"><a class="nav-link '.$nav_class.'" href="?p=input-entity&e='.$row['entity_code'].'&eid='.$row['id'].'">'.$row['entity_name'].'</a></li>';
 	}
 }
 

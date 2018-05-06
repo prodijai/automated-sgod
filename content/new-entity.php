@@ -14,6 +14,7 @@
                 <label for="entity_desc">Entity Description</label>
                 <input type="text" class="form-control" id="entity_desc" name="entity_desc" placeholder="Add a short description of the Entity" required>
               </div>
+
               <div class="form-group">
                 <label for="enable_login">Enable Login</label>
                 <select class="form-control" id="enable_login" name="enable_login">

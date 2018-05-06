@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>POC and TESTS Page</title>
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
-	<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-</head>
-<script>
-$(function() {
-    $( "#skills" ).autocomplete({
-        source: '../system/query.php?p=input-entity'
-    });
-});
-</script>
-<body>
-<div class="ui-widget">
-    <label for="skills">Skills: </label>
-    <input id="skills">
-</div>
-</body>
+<?php
 
-</html>
+include("../system/functions.php");
+
+$link_id = "1";
+$permission_list = array('add-new-field-form','delete-form-data','edit-form-data','input-form','list-form-data','list-forms');
+applyPermissions($permission_list,$link_id);
+
+?>

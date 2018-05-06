@@ -1,9 +1,15 @@
 <?php
 
 $session_entity_id = $_SESSION['entity_id'];
+$session_member_id = $_SESSION['member_id'];
+
+$form_code = make_safe($_GET['f']);
+$form_id =  make_safe($_GET['fid']);
+//test access
+validateUserAccess(make_safe($_GET['p']),'1',$form_id);
 
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-$result0 = mysqli_query($conn,"SELECT * from system_forms WHERE form_code = '".make_safe($_GET['f'])."';");
+$result0 = mysqli_query($conn,"SELECT * from system_forms WHERE form_code = '".$form_code."';");
 $row0 = mysqli_fetch_array($result0);
 
 $result1 = mysqli_query($conn,"SELECT * from system_entities WHERE id = '".$row0['form_entity_link']."';");
@@ -51,9 +57,10 @@ $(function() {
                 <input type="text" class="form-control" id="form_code" name="form_code" hidden value="<?php echo $row0['form_code'];?>">
                 <input type="text" class="form-control" id="form_id" name="form_id" hidden value="<?php echo $row0['id'];?>">
                 <input type="text" class="form-control" id="entity_code" name="entity_code" hidden value="<?php echo $entity_code;?>">
+                <input type="text" class="form-control" id="created_by" name="created_by" hidden value="<?php echo $session_member_id;?>">
                 
                 <?php
-                $result = mysqli_query($conn,"SELECT * from system_fields INNER JOIN system_forms ON system_forms.id = system_fields.form_link WHERE system_forms.form_code = '".make_safe($_GET['f'])."'  ORDER BY system_fields.field_order;");
+                $result = mysqli_query($conn,"SELECT * from system_fields INNER JOIN system_forms ON system_forms.id = system_fields.form_link WHERE system_forms.form_code = '".$form_code."'  ORDER BY system_fields.field_order;");
 
                 $i = 0; 
                 while($row = mysqli_fetch_array($result)){
@@ -77,17 +84,21 @@ $(function() {
                 actionResult($_SESSION['action_result_page'],$_GET['p'],$_SESSION['action_notif_type'],$_SESSION['action_result_message']);
 
               ?>
+              <h4>Actions</h4>
+            <?php echo "<p>" . printViewLink('list-form-data','1',$form_id,'f='.$form_code.'&fid='.$form_id.'') . printEditLink('edit-form','0','0','fid='.$form_id.'') .printPermissionLink('list-form-permissions','f='.$form_code.'&fid='.$form_id.'')."</p>" ?>
             <?php
-              if ($session_entity_id == '0') {
-                $count = '1';
+              // if ($session_entity_id == '0') {
+              //   $count = '1';
 
-              } else {
-                $permission_check = mysqli_query($conn,"SELECT * FROM system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions.code = 'add-new-field-form' AND system_permissions_config.entity_id = '$session_entity_id'");
-                $count = mysqli_num_rows($permission_check);
-              }
-              // echo $count;
+              // } else {
+              //   $permission_check = mysqli_query($conn,"SELECT * FROM system_permissions INNER JOIN system_permissions_config ON system_permissions_config.permission_id = system_permissions.id WHERE system_permissions.code = 'add-new-field-form' AND system_permissions_config.entity_id = '$session_entity_id'");
+              //   $count = mysqli_num_rows($permission_check);
+              // }
+              // // echo $count;
 
-              if ($count > '0') {
+              $aclValue = validateUserPermission("add-new-field-form","1",$form_id);
+
+              if ($aclValue == '200') {
                 echo '
             <h4><a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">Add New Field</a></h4>
             <p>Add new fields to this form.</p>
@@ -99,8 +110,8 @@ $(function() {
                 <form action="system/functions.php" method="post">
                 <input type="text" class="form-control" id="form_code" name="form_code" hidden value="'.$_GET['f'].'">';
 
-              if (isset($_GET['fid'])) {
-                echo '<input type="text" class="form-control" id="field_form_link" name="field_form_link" hidden value="'.$_GET['fid'].'">';
+              if (isset($form_id)) {
+                echo '<input type="text" class="form-control" id="field_form_link" name="field_form_link" hidden value="'.$form_id.'">';
               }
               elseif (isset($_GET['eid'])) {
                 echo '<input type="text" class="form-control" id="field_entity_link" name="field_entity_link" hidden value="'.$_GET['eid'].'">';
@@ -160,7 +171,6 @@ $(function() {
 
                   ';
               }
-               mysqli_close($conn);
 
             ?>
 

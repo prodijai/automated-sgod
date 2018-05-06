@@ -2,47 +2,16 @@
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 session_start();
 
+include("functions.php");
+
 // ╔═╗╔═╗╔═╗╦ ╦╦═╗╦╔╦╗╦ ╦
 // ╚═╗║╣ ║  ║ ║╠╦╝║ ║ ╚╦╝
 // ╚═╝╚═╝╚═╝╚═╝╩╚═╩ ╩  ╩ 
 
-function make_safe($variable) {
-    $variable = strip_html_tags($variable);
-	$bad = array("=","<", ">", "/","\"","`","~","'","$","%","#");
-	$variable = str_replace($bad, "", $variable);
-    $variable = mysql_real_escape_string(trim($variable));
-    return $variable;
-}
-
-function strip_html_tags($text) {
-    $text = preg_replace(
-        array(
-          // Remove invisible content
-            '@<head[^>]*?>.*?</head>@siu',
-            '@<style[^>]*?>.*?</style>@siu',
-            '@<script[^>]*?.*?</script>@siu',
-            '@<object[^>]*?.*?</object>@siu',
-            '@<embed[^>]*?.*?</embed>@siu',
-            '@<applet[^>]*?.*?</applet>@siu',
-            '@<noframes[^>]*?.*?</noframes>@siu',
-            '@<noscript[^>]*?.*?</noscript>@siu',
-			'@fu[^u]*?.*?ck@siu',
-            '@<noembed[^>]*?.*?</noembed>@siu'
-        ),
-        array(
-            '', '', '', '', '', '', '', '', '', ''), $text );
-      
-    return strip_tags( $text);
-}
-function filterurl($variable) {
-    $variable = strip_html_tags($variable);
-	$bad = array("=","<", ">","","`","~","'","$","%","#");
-	$variable = str_replace($bad, "", $variable);
-    $variable = mysql_real_escape_string(trim($variable));
-    return $variable;
-}
-
 $action = make_safe($_GET['a']);
+
+//test access to functions
+validateGlobalAccess($action);
 
 switch ($action) {
 	case 'delete-report':
@@ -56,6 +25,7 @@ switch ($action) {
 		break;
 
 	case 'delete-form':
+
 
 		$form_id = make_safe($_GET['f_id']);
 		
@@ -73,7 +43,7 @@ switch ($action) {
 		$i++;
 			#delete report configurations
 			$report_id = $row['id'];
-			dbRowDelete("system_reports_config","WHERE report_id = $report_id");
+			rowDelete("system_reports_config","WHERE report_id = $report_id");
 		}
 
 		#delete reports
@@ -95,7 +65,7 @@ switch ($action) {
 			$field_id = $row2['id'];
 			echo $field_id."<br>";
 			#update field
-			dbRowUpdate('system_fields', $form_data, "WHERE id = $field_id");
+			rowUpdate('system_fields', $form_data, "WHERE id = $field_id");
 
 		}
 		mysqli_close($conn);
@@ -110,6 +80,9 @@ switch ($action) {
 
 		break;
 	case 'delete-entity':
+
+		// // test if user has this permission function - global permissions
+		// $test = validateUserAccess('delete-entity','0','0');
 
 		include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
@@ -133,7 +106,7 @@ switch ($action) {
 				'entity_link' => ''
 			);
 
-			dbRowUpdate('system_fields', $form_data, "WHERE id = $field_id");
+			rowUpdate('system_fields', $form_data, "WHERE id = $field_id");
 
 		}
 
@@ -146,17 +119,17 @@ switch ($action) {
 			echo $linked_rows["report_id"] ."<br>";
 			$report_id = $linked_rows["report_id"];
 
-			dbRowDelete("system_reports_config","WHERE report_id = $report_id");
-			dbRowDelete("system_reports","WHERE id = $report_id");
+			rowDelete("system_reports_config","WHERE report_id = $report_id");
+			rowDelete("system_reports","WHERE id = $report_id");
 
 
 		}
 
 		//delete permissions
-		dbRowDelete("system_permissions_config","WHERE entity_id = $entity_id");
+		rowDelete("system_permissions_config","WHERE entity_id = $entity_id");
 
 		// delete form
-		dbRowDelete("system_forms","WHERE form_entity_link = $entity_id");
+		rowDelete("system_forms","WHERE form_entity_link = $entity_id");
 
 		//drop table
 		$table_name = "usr_".$entity_code;
@@ -167,8 +140,11 @@ switch ($action) {
 		
 		break;
 	case 'delete-template':
-
 		$template_id = make_safe($_GET['t_id']);
+		
+		//test
+		$test = validateUserAccess('delete-template','4',$template_id);
+
 		deleteData("list-templates","system_reports_hnf","WHERE id = $template_id");
 		break;
 	case 'delete-form-field':
@@ -191,17 +167,21 @@ switch ($action) {
 		break;
 	case 'delete-form-data':
 
+
+		$form_id = make_safe($_GET['fid']);
 		$form_code = make_safe($_GET['form_code']);
 		$table_name = "usr_".$form_code;
 		$unique_code = make_safe($_GET['unique_code']);
+
+		// test if user has this permission function - 1 means forms
+		$test = validateUserAccess('delete-form-data','1',$form_id);
+		
+		echo $test;
 
 		echo $form_code . "<br>";
 		echo $table_name . "<br>";
 		echo $unique_code . "<br>";
 
-		// if ($unique_code) {
-		// 	# code...
-		// }
 		// delete entry from table
 		deleteData("list-forms",$table_name,"WHERE unique_code = '$unique_code'");
 
@@ -209,6 +189,9 @@ switch ($action) {
 	case 'delete-entity-data':
 		$entity_id = make_safe($_GET['e_id']);
 		$unique_code = make_safe($_GET['uid']);
+
+		//test user permission
+		validateUserAccess("delete-entity-data",'2',$entity_id);
 
 		include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
@@ -220,7 +203,7 @@ switch ($action) {
 			$table_code = "usr_" . $row['form_code'];
 			echo $table_code . "<br>";
 			
-			dbRowDelete($table_code,"WHERE unique_code = $unique_code");
+			rowDelete($table_code,"WHERE unique_code = $unique_code");
 		}
 
 		deleteData("list-entity-data","system_users","WHERE unique_code = '$unique_code'");
@@ -231,6 +214,19 @@ switch ($action) {
 
 		//detele field from table
 		deleteData("list-fields","system_fields","WHERE id = '$field_id'");
+		break;
+	case 'delete-school':
+		$school_id = make_safe($_GET['s_id']);
+
+		include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+
+		$school_data_check = mysqli_query($conn,"SELECT * FROM system_users WHERE school_id = '$school_id';");
+	    $count = mysqli_num_rows($school_data_check);
+
+	    if ($count < 1) {
+	      deleteData("list-schools","system_schools","WHERE id = '$school_id'");
+	    }
+
 		break;
 	default:
 		echo "no defined function";
@@ -243,7 +239,7 @@ function deleteData($page_id,$table_name,$where_clause,$redirect){
 
 	$_SESSION['action_result_page'] = $page_id;
 
-	if (dbRowDelete($table_name,$where_clause) == "success") {
+	if (rowDelete($table_name,$where_clause) == "success") {
 		echo "success";
 	}
 
@@ -261,25 +257,11 @@ function deleteData($page_id,$table_name,$where_clause,$redirect){
 //  ║║╠═╣ ║ ╠═╣╠╩╗╠═╣╚═╗║╣ 
 // ═╩╝╩ ╩ ╩ ╩ ╩╚═╝╩ ╩╚═╝╚═╝
 
-function checkIfDataExist($table,$column,$value){
 
+// rowDelete('my_table', "WHERE id = '$id'");
+function rowDelete($table_name, $where_clause=''){
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-
-	$strSQL = "SELECT * FROM $table WHERE $column = '".$value."' ";
-	$objQuery = mysqli_query($conn,$strSQL);
-	$objResult = mysqli_fetch_array($objQuery);
-
-	if($objResult) {
-		return true;
-	}
-	else{
-		return false;
-	}
-}
-
-// dbRowDelete('my_table', "WHERE id = '$id'");
-function dbRowDelete($table_name, $where_clause=''){
-	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+	
 	// check for optional where clause
 	$whereSQL = '';
 	if(!empty($where_clause)){
@@ -336,8 +318,8 @@ function dbDropColumn($table_name,$column_name){
 
 }
 
-// dbRowUpdate('my_table', $form_data, "WHERE id = '$id'");
-function dbRowUpdate($table_name, $form_data, $where_clause=''){
+// rowUpdate('my_table', $form_data, "WHERE id = '$id'");
+function rowUpdate($table_name, $form_data, $where_clause=''){
 	include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
 	// check for optional where clause

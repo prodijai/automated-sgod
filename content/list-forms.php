@@ -7,11 +7,35 @@ $page_id = make_safe($_GET['p']);
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
 
 
-$result = mysqli_query($conn,"SELECT * FROM system_forms WHERE (form_name LIKE '%$keyword%' OR form_description LIKE '%$keyword%' OR form_code LIKE '%$keyword%') ORDER BY id, form_code");
+if ($_SESSION['entity_id'] == '0') {
+
+  $sql = "SELECT * FROM system_forms WHERE (form_name LIKE '%$keyword%' OR form_description LIKE '%$keyword%' OR form_code LIKE '%$keyword%') ORDER BY id, form_code";
+
+} else {
+  $permission_code = "list-forms";
+  $entity_id = $_SESSION['entity_id'];
+  $school_id = $_SESSION['school_id'];
+  $member_id = $_SESSION['member_id'];
+  $sql = "SELECT DISTINCT(system_forms.form_name),system_forms.form_code,system_forms.form_description,system_forms.id,system_forms.created_by 
+        FROM system_forms 
+        INNER JOIN system_permissions_config ON system_permissions_config.link_id = system_forms.id 
+        INNER JOIN system_permissions ON system_permissions.id = system_permissions_config.permission_id 
+        WHERE ((system_permissions.permission_type = 1 AND 
+        system_permissions.code like '$permission_code' AND 
+        system_permissions_config.entity_id like '$entity_id' AND 
+        system_permissions_config.school_id like '$school_id') OR system_forms.created_by like '$member_id') AND
+        (system_forms.form_name LIKE '%$keyword%' OR system_forms.form_description LIKE '%$keyword%' OR system_forms.form_code LIKE '%$keyword%') 
+        ORDER BY system_forms.id, system_forms.form_code";
+}
+
+
+// SELECT * FROM system_forms WHERE (form_name LIKE '%$keyword%' OR form_description LIKE '%$keyword%' OR form_code LIKE '%$keyword%') ORDER BY id, form_code
+
+$result = mysqli_query($conn,$sql);
 ?>
           <div class="row">
             <div class="col-12">
-              <a href="?p=new-form" class="btn btn-outline-success float-right" role="button">Create New Form</a>
+              <!-- <a href="?p=new-form" class="btn btn-outline-success float-right" role="button">Create New Form</a> -->
               <h2>Available Forms</h2>
               <p>Here are the available Forms</p>
               <div class="row">
@@ -49,7 +73,7 @@ $result = mysqli_query($conn,"SELECT * FROM system_forms WHERE (form_name LIKE '
                 echo "<td>" . $row['form_name'] . "</td>";
                 echo "<td>" . $row['form_code'] . "</td>";
                 echo "<td>" . $row['form_description'] . "</td>";
-                echo '<td>'.printInputLink('input-form','f='.$row['form_code'].'&fid='.$row['id'].'') . printViewLink('list-form-data','f='.$row['form_code'].'&fid='.$row['id'].'') . printEditLink('edit-form','fid='.$row['id'].'') . printDeleteLink('delete-form','f_id='.$row['id'].'') .'</td>';
+                echo '<td>'.printInputLink('input-form','1',$row['id'],'f='.$row['form_code'].'&fid='.$row['id'].'') . printViewLink('list-form-data','1',$row['id'],'f='.$row['form_code'].'&fid='.$row['id'].'') . printEditLink('edit-form','0','0','fid='.$row['id'].'') . printDeleteLink('delete-form','0','0','f_id='.$row['id'].'') .printPermissionLink('list-form-permissions','f='.$row['form_code'].'&fid='.$row['id'].'').'</td>';
                 echo "</tr>";
               }
               mysqli_close($conn);

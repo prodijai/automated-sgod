@@ -5,7 +5,9 @@ $_SESSION['previous_uri'] = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php"); 
 // $_GET['p']="";
 validateSession();
-validateAccess($_GET['p']);
+// // validateAccess($_GET['p']);
+// validateUserAccess($_GET['p'],'0','0');
+validateGlobalAccess($_GET['p']);
 ?>
 <!DOCTYPE html>
 <html lang="en" class="gr__v4-alpha_getbootstrap_com"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -54,8 +56,8 @@ validateAccess($_GET['p']);
   </head>
 
   <body data-gr-c-s-loaded="true">
-    <?php include("menus/top-nav.php"); ?>
 
+    <?php include("menus/top-nav.php"); ?>
     <div class="container-fluid">
       <div class="row">
         <?php include("menus/left-nav.php");?>

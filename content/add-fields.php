@@ -63,7 +63,7 @@
                 <select class="form-control" id="field_valid_char" name="field_valid_char">
                   <option value="any" selected="selected">Anything</option>
                   <option value="alphanumeric-only">Alphanumeric Only</option>
-                  <option value="aphabet-only">Alphabet Only</option>
+                  <option value="alphabet-only">Alphabet Only</option>
                   <option value="numbers-only">Numbers Only</option>
                 </select>
               </div>

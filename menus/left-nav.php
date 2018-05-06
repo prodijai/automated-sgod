@@ -24,6 +24,8 @@
             <?php createSidebarMenu("New Form","new-form",$_GET['p']); ?>
             <?php //createSidebarMenu("New Field","add-fields",$_GET['p']); ?>
             <?php createSidebarMenu("New Entity","new-entity",$_GET['p']); ?>
+            <?php createSidebarMenu("New School","new-school",$_GET['p']); ?>
             <?php createSidebarMenu("List Fields","list-fields",$_GET['p']); ?>
+            <?php createSidebarMenu("List Schools","list-schools",$_GET['p']); ?>
           </ul>
         </nav>

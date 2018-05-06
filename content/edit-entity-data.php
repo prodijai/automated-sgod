@@ -2,9 +2,12 @@
 include_once($_SERVER['DOCUMENT_ROOT']."/ecj1718/system/functions.php");
 
 $id = make_safe($_GET['uid']);
+$entity_id = make_safe($_GET['eid']);
+
+validateUserAccess("edit-entity-data",'2',$entity_id);
 
 include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
-$result = mysqli_query($conn,"SELECT * FROM system_users WHERE unique_code = '$id' LIMIT 1");
+$result = mysqli_query($conn,"SELECT * FROM system_users WHERE unique_code = '$id' AND entity_id = '$entity_id' LIMIT 1");
 $user_data = mysqli_fetch_array($result);
 
 ?>
@@ -15,6 +18,7 @@ $user_data = mysqli_fetch_array($result);
               <hr>
               <form action="system/functions.php" method="post">
                 <input type="hidden" class="form-control" id="userid" name="userid" readonly value="<?php echo $user_data['id'];?>">
+                <input type="hidden" class="form-control" id="entity_id" name="entity_id" readonly value="<?php echo $entity_id;?>">
 
                 <!-- Unique Code -->
                 <div class="form-group">
@@ -46,11 +50,32 @@ $user_data = mysqli_fetch_array($result);
                   <input type="email" class="form-control" id="email" name="email" required placeholder="Email Address" value="<?php echo $user_data['email'];?>">
                 </div>
 
-                <!-- Email -->
+                <!-- Mobile Number -->
                 <div class="form-group">
                   <label for="mobile">Mobile Number</label>
                   <input type="text" class="form-control" id="mobile" name="mobile" required placeholder="Mobile Number" value="<?php echo $user_data['mobile'];?>">
                 </div>
+
+                <!-- School -->
+                <div class="form-group">
+                <label for="enable_login">School</label>
+                <select class="form-control" id="school_id" name="school_id">
+                  <option value="" disabled="" selected="">Which school they belong?</option>
+                  <option value="0">n/a</option>
+                  <?php 
+                    include($_SERVER['DOCUMENT_ROOT']."/ecj1718/conn.php");
+                    $result = mysqli_query($conn,"SELECT * FROM system_schools");
+
+                    $i = 0; 
+                    while($row = mysqli_fetch_array($result)){
+                      $i++;
+                      echo '<option value="'.$row['id'].'" '.testSelected($row['id'],$user_data['school_id']).'>'.$row['school_acronym'].' - '.$row['school_code'].'</option>';
+                    }
+                    mysqli_close($conn);
+
+                  ?>
+                </select>
+              </div>
 
                 <!-- Username -->
                 <div class="form-group">
