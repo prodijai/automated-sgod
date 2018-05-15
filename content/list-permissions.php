@@ -49,13 +49,13 @@ function checkAll(formname, checktoggle)
                     <select class="form-control" id="sid" name="sid" required  style="max-width: 500px;" onchange="this.form.submit()" >
                       <?php 
 
-                        if ($school_id == '') {
-                          // echo '<option value="" disabled="" selected="">Which school to apply permissions?</option>';
-                          $school_id = "DEFAULT";
+                        // if ($school_id == '') {
+                        //   // echo '<option value="" disabled="" selected="">Which school to apply permissions?</option>';
+                        //   $school_id = "DEFAULT";
 
-                        }
+                        // }
 
-                        $schools = mysqli_query($conn,"SELECT * FROM system_Schools");
+                        $schools = mysqli_query($conn,"SELECT * FROM system_schools");
                         $s = 0; 
                         while($school = mysqli_fetch_array($schools)){
                           $s++;
@@ -114,7 +114,7 @@ function checkAll(formname, checktoggle)
               <button type="submit" class="btn btn-primary mb-2" name="save_config_permission">Save Permission Configuration</button>
               </form>
             </div>
-            <?php mysqli_close($conn); ?>
+            <?php // mysqli_close($conn); ?>
             
 <!--             <div class="col-4">
               <?php 
