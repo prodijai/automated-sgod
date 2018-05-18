@@ -60,7 +60,7 @@
     </div>';
     }
     ?>
-    <div class="jumbotron">
+    <div class="jumbotron" style="background-image: url(../images/bg2.jpg) !important; background-position: 0% 40%; background-size: cover; background-repeat: no-repeat;">
 
       <div class="container">
         <h1 class="display-3">Hello, Mabuhay!</h1>
